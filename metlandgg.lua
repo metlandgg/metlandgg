@@ -417,7 +417,7 @@ local function toggleMinimize()
     tween:Play()
 end
 
--- BRING PLAYER FUNCTION (NEW!)
+-- BRING PLAYER FUNCTION (NEW! - FIXED)
 local function bringPlayer()
     local name = bringBox.Text:lower()
     if name == "" then
@@ -428,14 +428,33 @@ local function bringPlayer()
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= plr and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
             if p.Name:lower():find(name) or p.DisplayName:lower():find(name) then
-                -- Bring target player to you
+                -- Method 1: Direct CFrame change
                 local targetRoot = p.Character.HumanoidRootPart
-                local oldCFrame = targetRoot.CFrame
+                local targetHum = p.Character:FindFirstChildOfClass("Humanoid")
                 
-                -- Teleport them to you
-                targetRoot.CFrame = root.CFrame + Vector3.new(0, 0, -3)
+                -- Disable their humanoid temporarily
+                if targetHum then
+                    targetHum.PlatformStand = true
+                end
                 
-                updateStatus("Brought " .. p.Name .. " to you!", Color3.fromRGB(255, 200, 0))
+                -- Move them to you
+                task.spawn(function()
+                    for i = 1, 10 do
+                        if targetRoot and targetRoot.Parent then
+                            targetRoot.CFrame = root.CFrame * CFrame.new(0, 0, -4)
+                            targetRoot.Velocity = Vector3.new(0, 0, 0)
+                            targetRoot.RotVelocity = Vector3.new(0, 0, 0)
+                        end
+                        task.wait(0.1)
+                    end
+                    
+                    -- Re-enable humanoid
+                    if targetHum then
+                        targetHum.PlatformStand = false
+                    end
+                end)
+                
+                updateStatus("Bringing " .. p.Name .. " to you!", Color3.fromRGB(255, 200, 0))
                 return
             end
         end

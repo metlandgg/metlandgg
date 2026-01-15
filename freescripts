@@ -1,1 +1,1 @@
-gg
+loadstring(game:HttpGet("https://raw.githubusercontent.com/metlandgg/metlandgg/main/freeversion"))()

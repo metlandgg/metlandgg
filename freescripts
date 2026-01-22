@@ -1,1 +1,1544 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/metlandgg/metlandgg/main/freeversion"))()
+-- KEYSYSTEM: "23GG" REQUIRED (Case Insensitive)
+local REQUIRED_KEY = "23GG"
+local keyEntered = false
+
+-- Simple keypad UI untuk keysystem
+local Players = game:GetService("Players")
+local plr = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+-- LOADING SCREEN HACKER STYLE
+local function createLoadingScreen()
+    local loadingGui = Instance.new("ScreenGui")
+    loadingGui.Name = "HackerLoading"
+    loadingGui.ResetOnSpawn = false
+    loadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    loadingGui.Parent = plr:WaitForChild("PlayerGui")
+    
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainFrame"
+    mainFrame.Size = UDim2.new(0, 600, 0, 400)
+    mainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = loadingGui
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 15)
+    corner.Parent = mainFrame
+    
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(0, 255, 150)
+    stroke.Thickness = 2
+    stroke.Transparency = 0.5
+    stroke.Parent = mainFrame
+    
+    -- Gradient background
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 15, 20)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 5, 10))
+    }
+    gradient.Rotation = 45
+    gradient.Parent = mainFrame
+    
+    -- Title with gradient
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, -40, 0, 50)
+    title.Position = UDim2.new(0, 20, 0, 20)
+    title.BackgroundTransparency = 1
+    title.Text = "VIOLENCE DISTRICT"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextSize = 28
+    title.Font = Enum.Font.Code
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = mainFrame
+    
+    local titleGradient = Instance.new("UIGradient")
+    titleGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 150)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 200, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 0, 255))
+    }
+    titleGradient.Parent = title
+    
+    -- Subtitle
+    local subtitle = Instance.new("TextLabel")
+    subtitle.Size = UDim2.new(1, -40, 0, 20)
+    subtitle.Position = UDim2.new(0, 20, 0, 65)
+    subtitle.BackgroundTransparency = 1
+    subtitle.Text = "INITIALIZING SYSTEM..."
+    subtitle.TextColor3 = Color3.fromRGB(0, 255, 150)
+    subtitle.TextSize = 14
+    subtitle.Font = Enum.Font.Code
+    subtitle.TextXAlignment = Enum.TextXAlignment.Left
+    subtitle.Parent = mainFrame
+    
+    -- Console output
+    local consoleFrame = Instance.new("ScrollingFrame")
+    consoleFrame.Size = UDim2.new(1, -40, 0, 200)
+    consoleFrame.Position = UDim2.new(0, 20, 0, 100)
+    consoleFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 8)
+    consoleFrame.BorderSizePixel = 0
+    consoleFrame.ScrollBarThickness = 4
+    consoleFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    consoleFrame.Parent = mainFrame
+    
+    local consoleCorner = Instance.new("UICorner")
+    consoleCorner.CornerRadius = UDim.new(0, 8)
+    consoleCorner.Parent = consoleFrame
+    
+    local consoleList = Instance.new("UIListLayout")
+    consoleList.Padding = UDim.new(0, 2)
+    consoleList.Parent = consoleFrame
+    
+    -- Progress bar
+    local progressBg = Instance.new("Frame")
+    progressBg.Size = UDim2.new(1, -40, 0, 25)
+    progressBg.Position = UDim2.new(0, 20, 0, 315)
+    progressBg.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    progressBg.BorderSizePixel = 0
+    progressBg.Parent = mainFrame
+    
+    local progressCorner = Instance.new("UICorner")
+    progressCorner.CornerRadius = UDim.new(0, 8)
+    progressCorner.Parent = progressBg
+    
+    local progressBar = Instance.new("Frame")
+    progressBar.Size = UDim2.new(0, 0, 1, 0)
+    progressBar.BackgroundColor3 = Color3.fromRGB(0, 255, 150)
+    progressBar.BorderSizePixel = 0
+    progressBar.Parent = progressBg
+    
+    local progressBarCorner = Instance.new("UICorner")
+    progressBarCorner.CornerRadius = UDim.new(0, 8)
+    progressBarCorner.Parent = progressBar
+    
+    local progressGradient = Instance.new("UIGradient")
+    progressGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 150)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 200, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 0, 255))
+    }
+    progressGradient.Parent = progressBar
+    
+    local progressText = Instance.new("TextLabel")
+    progressText.Size = UDim2.new(1, 0, 1, 0)
+    progressText.BackgroundTransparency = 1
+    progressText.Text = "0%"
+    progressText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    progressText.TextSize = 14
+    progressText.Font = Enum.Font.Code
+    progressText.Parent = progressBg
+    
+    -- Status text
+    local statusText = Instance.new("TextLabel")
+    statusText.Size = UDim2.new(1, -40, 0, 30)
+    statusText.Position = UDim2.new(0, 20, 0, 350)
+    statusText.BackgroundTransparency = 1
+    statusText.Text = "READY TO EXECUTE"
+    statusText.TextColor3 = Color3.fromRGB(0, 255, 150)
+    statusText.TextSize = 16
+    statusText.Font = Enum.Font.Code
+    statusText.TextXAlignment = Enum.TextXAlignment.Center
+    statusText.Parent = mainFrame
+    
+    -- Random string generator
+    local function generateRandomHash(length)
+        local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+        local hash = ""
+        for i = 1, length do
+            local rand = math.random(1, #chars)
+            hash = hash .. chars:sub(rand, rand)
+        end
+        return hash
+    end
+    
+    -- Function to add console line
+    local function addConsoleLine(text, color)
+        local line = Instance.new("TextLabel")
+        line.Size = UDim2.new(1, -10, 0, 18)
+        line.BackgroundTransparency = 1
+        line.Text = "> " .. text
+        line.TextColor3 = color or Color3.fromRGB(0, 255, 150)
+        line.TextSize = 12
+        line.Font = Enum.Font.Code
+        line.TextXAlignment = Enum.TextXAlignment.Left
+        line.TextTransparency = 1
+        line.Parent = consoleFrame
+        
+        consoleFrame.CanvasSize = UDim2.new(0, 0, 0, consoleList.AbsoluteContentSize.Y)
+        consoleFrame.CanvasPosition = Vector2.new(0, consoleList.AbsoluteContentSize.Y)
+        
+        TweenService:Create(line, TweenInfo.new(0.2), {TextTransparency = 0}):Play()
+        
+        return line
+    end
+    
+    -- Hacker messages dengan random hashes
+    local messages = {
+        {"CONNECTING TO NETWORK...", Color3.fromRGB(0, 255, 150)},
+        {"SOCKET_ID: " .. generateRandomHash(16), Color3.fromRGB(100, 100, 100)},
+        {"ESTABLISHING SECURE TUNNEL...", Color3.fromRGB(0, 200, 255)},
+        {"HANDSHAKE: " .. generateRandomHash(24), Color3.fromRGB(100, 100, 100)},
+        {"BYPASSING GAME SECURITY...", Color3.fromRGB(255, 200, 0)},
+        {"EXPLOIT_KEY: " .. generateRandomHash(20), Color3.fromRGB(100, 100, 100)},
+        {"COLLECTION METADATA...", Color3.fromRGB(150, 0, 255)},
+        {"METADATA_HASH: " .. generateRandomHash(18), Color3.fromRGB(100, 100, 100)},
+        {"INJECTING CORE MODULES...", Color3.fromRGB(0, 255, 150)},
+        {"MODULE_ID: " .. generateRandomHash(22), Color3.fromRGB(100, 100, 100)},
+        {"LOADING ESP SYSTEMS...", Color3.fromRGB(0, 200, 255)},
+        {"ESP_SIGNATURE: " .. generateRandomHash(16), Color3.fromRGB(100, 100, 100)},
+        {"INITIALIZING AUTO FARM...", Color3.fromRGB(255, 200, 0)},
+        {"FARM_TOKEN: " .. generateRandomHash(20), Color3.fromRGB(100, 100, 100)},
+        {"HOOKING REMOTE EVENTS...", Color3.fromRGB(150, 0, 255)},
+        {"HOOK_ADDR: " .. generateRandomHash(24), Color3.fromRGB(100, 100, 100)},
+        {"PREPARING TELEPORTATION...", Color3.fromRGB(0, 255, 150)},
+        {"TP_VECTOR: " .. generateRandomHash(18), Color3.fromRGB(100, 100, 100)},
+        {"VERIFYING CREDENTIALS...", Color3.fromRGB(0, 200, 255)},
+        {"AUTH_TOKEN: " .. generateRandomHash(28), Color3.fromRGB(100, 100, 100)},
+        {"USER DETECTED: " .. plr.Name, Color3.fromRGB(0, 255, 255)},
+        {"USER_ID: " .. plr.UserId, Color3.fromRGB(100, 100, 100)},
+        {"ACCESS GRANTED!", Color3.fromRGB(0, 255, 0)},
+        {"SESSION_KEY: " .. generateRandomHash(32), Color3.fromRGB(100, 100, 100)},
+        {"ALL SYSTEMS OPERATIONAL", Color3.fromRGB(0, 255, 150)}
+    }
+    
+    -- Animate loading (10 seconds total)
+    task.spawn(function()
+        local totalTime = 10
+        local delayPerMessage = totalTime / #messages
+        
+        for i, msg in ipairs(messages) do
+            addConsoleLine(msg[1], msg[2])
+            
+            local progress = (i / #messages) * 100
+            progressText.Text = math.floor(progress) .. "%"
+            
+            TweenService:Create(progressBar, TweenInfo.new(0.3), {
+                Size = UDim2.new(progress / 100, 0, 1, 0)
+            }):Play()
+            
+            if i == #messages then
+                statusText.Text = "EXECUTION COMPLETE"
+                statusText.TextColor3 = Color3.fromRGB(0, 255, 0)
+            end
+            
+            task.wait(delayPerMessage)
+        end
+        
+        task.wait(1)
+        
+        TweenService:Create(mainFrame, TweenInfo.new(0.5), {
+            Position = UDim2.new(0.5, -300, -0.5, 0)
+        }):Play()
+        
+        task.wait(0.5)
+        loadingGui:Destroy()
+    end)
+    
+    return loadingGui
+end
+
+-- UPDATED KEY FRAME WITH GRADIENT TEXT
+local keypadUI = Instance.new("ScreenGui")
+keypadUI.Name = "KeypadUI"
+keypadUI.ResetOnSpawn = false
+keypadUI.Parent = plr:WaitForChild("PlayerGui")
+
+local keyFrame = Instance.new("Frame")
+keyFrame.Name = "KeyFrame"
+keyFrame.Size = UDim2.new(0, 400, 0, 280)
+keyFrame.Position = UDim2.new(0.5, -200, 0.5, -140)
+keyFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+keyFrame.BorderSizePixel = 0
+keyFrame.Parent = keypadUI
+
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0, 20)
+frameCorner.Parent = keyFrame
+
+local frameStroke = Instance.new("UIStroke")
+frameStroke.Color = Color3.fromRGB(0, 255, 150)
+frameStroke.Thickness = 2
+frameStroke.Transparency = 0.3
+frameStroke.Parent = keyFrame
+
+local frameGradient = Instance.new("UIGradient")
+frameGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 30)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 10, 15))
+}
+frameGradient.Rotation = 135
+frameGradient.Parent = keyFrame
+
+-- Animated gradient stroke
+task.spawn(function()
+    while keyFrame.Parent do
+        for i = 0, 360, 2 do
+            if not keyFrame.Parent then break end
+            frameStroke.Color = Color3.fromHSV(i / 360, 1, 1)
+            task.wait(0.05)
+        end
+    end
+end)
+
+-- GRADIENT TEXT: METLANDGG SCRIPT
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, -40, 0, 60)
+titleLabel.Position = UDim2.new(0, 20, 0, 20)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "METLANDGG SCRIPT"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextSize = 32
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextXAlignment = Enum.TextXAlignment.Center
+titleLabel.Parent = keyFrame
+
+local titleGradient = Instance.new("UIGradient")
+titleGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 150)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 200, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 255, 0))
+}
+titleGradient.Parent = titleLabel
+
+-- Animate gradient rotation
+task.spawn(function()
+    while titleLabel.Parent do
+        for i = 0, 360, 3 do
+            if not titleLabel.Parent then break end
+            titleGradient.Rotation = i
+            task.wait(0.03)
+        end
+    end
+end)
+
+-- Subtitle
+local subtitleLabel = Instance.new("TextLabel")
+subtitleLabel.Size = UDim2.new(1, -40, 0, 25)
+subtitleLabel.Position = UDim2.new(0, 20, 0, 80)
+subtitleLabel.BackgroundTransparency = 1
+subtitleLabel.Text = "Enter Access Key"
+subtitleLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+subtitleLabel.TextSize = 14
+subtitleLabel.Font = Enum.Font.Gotham
+subtitleLabel.TextXAlignment = Enum.TextXAlignment.Center
+subtitleLabel.Parent = keyFrame
+
+local inputBox = Instance.new("TextBox")
+inputBox.Name = "InputBox"
+inputBox.Size = UDim2.new(1, -60, 0, 50)
+inputBox.Position = UDim2.new(0, 30, 0, 120)
+inputBox.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+inputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+inputBox.Text = ""
+inputBox.PlaceholderText = "Enter key here..."
+inputBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
+inputBox.TextSize = 18
+inputBox.Font = Enum.Font.GothamMedium
+inputBox.BorderSizePixel = 0
+inputBox.Parent = keyFrame
+inputBox.ClearTextOnFocus = false
+
+local inputCorner = Instance.new("UICorner")
+inputCorner.CornerRadius = UDim.new(0, 12)
+inputCorner.Parent = inputBox
+
+local inputStroke = Instance.new("UIStroke")
+inputStroke.Color = Color3.fromRGB(50, 50, 70)
+inputStroke.Thickness = 2
+inputStroke.Parent = inputBox
+
+local submitButton = Instance.new("TextButton")
+submitButton.Name = "SubmitButton"
+submitButton.Size = UDim2.new(0.45, -10, 0, 45)
+submitButton.Position = UDim2.new(0.05, 0, 0, 190)
+submitButton.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+submitButton.Text = "SUBMIT"
+submitButton.TextSize = 16
+submitButton.Font = Enum.Font.GothamBold
+submitButton.BorderSizePixel = 0
+submitButton.Parent = keyFrame
+
+local submitCorner = Instance.new("UICorner")
+submitCorner.CornerRadius = UDim.new(0, 12)
+submitCorner.Parent = submitButton
+
+local submitGradient = Instance.new("UIGradient")
+submitGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 150)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 150, 255))
+}
+submitGradient.Rotation = 45
+submitGradient.Parent = submitButton
+
+local cancelButton = Instance.new("TextButton")
+cancelButton.Name = "CancelButton"
+cancelButton.Size = UDim2.new(0.45, -10, 0, 45)
+cancelButton.Position = UDim2.new(0.5, 5, 0, 190)
+cancelButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+cancelButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+cancelButton.Text = "EXIT"
+cancelButton.TextSize = 16
+cancelButton.Font = Enum.Font.GothamBold
+cancelButton.BorderSizePixel = 0
+cancelButton.Parent = keyFrame
+
+local cancelCorner = Instance.new("UICorner")
+cancelCorner.CornerRadius = UDim.new(0, 12)
+cancelCorner.Parent = cancelButton
+
+local cancelGradient = Instance.new("UIGradient")
+cancelGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 50, 50)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 0, 100))
+}
+cancelGradient.Rotation = 45
+cancelGradient.Parent = cancelButton
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Name = "StatusLabel"
+statusLabel.Size = UDim2.new(1, -40, 0, 25)
+statusLabel.Position = UDim2.new(0, 20, 0, 245)
+statusLabel.BackgroundTransparency = 1
+statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+statusLabel.Text = ""
+statusLabel.TextSize = 13
+statusLabel.Font = Enum.Font.GothamMedium
+statusLabel.TextXAlignment = Enum.TextXAlignment.Center
+statusLabel.Parent = keyFrame
+
+-- Button hover effects
+submitButton.MouseEnter:Connect(function()
+    TweenService:Create(submitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 255, 150)}):Play()
+end)
+
+submitButton.MouseLeave:Connect(function()
+    TweenService:Create(submitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 200, 100)}):Play()
+end)
+
+cancelButton.MouseEnter:Connect(function()
+    TweenService:Create(cancelButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 70, 70)}):Play()
+end)
+
+cancelButton.MouseLeave:Connect(function()
+    TweenService:Create(cancelButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(200, 50, 50)}):Play()
+end)
+
+submitButton.MouseButton1Click:Connect(function()
+    if inputBox.Text:upper() == REQUIRED_KEY:upper() then
+        keyEntered = true
+        keypadUI:Destroy()
+        createLoadingScreen()
+        task.wait(11)
+        loadMainScript()
+    else
+        statusLabel.Text = "❌ Wrong key!"
+        statusLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+        inputBox.Text = ""
+        task.wait(2)
+        statusLabel.Text = ""
+    end
+end)
+
+cancelButton.MouseButton1Click:Connect(function()
+    plr:Kick("Key cancelled by user")
+end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)  
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.Return then
+        submitButton.MouseButton1Click:Fire()
+    end
+end)
+
+function loadMainScript()
+    repeat task.wait() until game:IsLoaded()
+    task.wait(0.5)
+
+    local RunService = game:GetService("RunService")
+    local Lighting = game:GetService("Lighting")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+    -- Load WindUI Library (Mobile-Friendly)
+    local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/source.lua"))()
+
+    local Window = WindUI:CreateWindow({
+        Title = "Violence District | by metlandgg",
+        Icon = "rbxassetid://10723415766",
+        Author = "metlandgg",
+        Folder = "ViolenceDistrictConfig",
+        Size = UDim2.fromOffset(480, 360),
+        KeySystem = {
+            Key = "23GG",
+            Note = "Key already verified",
+            SaveKey = true,
+            FileName = "VDKey.txt"
+        },
+        Transparent = false,
+        Theme = "Dark",
+        SideBarWidth = 170,
+        HasOutline = true
+    })
+
+    local Main = Window:Tab({
+        Name = "Main",
+        Icon = "rbxassetid://10723424505",
+        Color = Color3.fromRGB(0, 255, 150)
+    })
+
+    local ESP = Window:Tab({
+        Name = "ESP",
+        Icon = "rbxassetid://10723407389",
+        Color = Color3.fromRGB(255, 100, 100)
+    })
+
+    local Teleport = Window:Tab({
+        Name = "Teleport",
+        Icon = "rbxassetid://10723415766",
+        Color = Color3.fromRGB(100, 150, 255)
+    })
+
+    local Auto = Window:Tab({
+        Name = "Auto Farm",
+        Icon = "rbxassetid://10723424505",
+        Color = Color3.fromRGB(255, 200, 0)
+    })
+
+    local settings = {
+        walkSpeedValue = 16,
+        walkSpeedEnabled = false,
+        jumpPower = 50,
+        noclipEnabled = false,
+        fogEnabled = false,
+        playerESPEnabled = false,
+        playerESPColor = Color3.fromRGB(0, 255, 0),
+        killerESPColor = Color3.fromRGB(255, 0, 0),
+        generatorESPEnabled = false,
+        generatorESPColor = Color3.fromRGB(255, 165, 0),
+        palletESPEnabled = false,
+        palletESPColor = Color3.fromRGB(255, 0, 0),
+        hookESPEnabled = false,
+        hookESPColor = Color3.fromRGB(150, 150, 150),
+        windowESPEnabled = false,
+        windowESPColor = Color3.fromRGB(0, 150, 255),
+        giftESPEnabled = false,
+        giftESPColor = Color3.fromRGB(255, 215, 0),
+        tpToolEnabled = false,
+        autoCollectGifts = false,
+        autoRepairEnabled = false,
+        antiFail = false,
+        giftDelay = 2
+    }
+
+    local function getChar()
+        return plr.Character or plr.CharacterAdded:Wait()
+    end
+
+    local oldFog = {}
+    local noclipConnection
+    local walkSpeedConnection
+    
+    Main:Section({
+        Name = "Movement"
+    })
+    
+    Main:Toggle({
+        Name = "Walk Speed",
+        Flag = "WalkSpeedEnabled",
+        Value = false,
+        Callback = function(value)
+            settings.walkSpeedEnabled = value
+            
+            if value then
+                if walkSpeedConnection then
+                    walkSpeedConnection:Disconnect()
+                end
+                
+                walkSpeedConnection = RunService.Heartbeat:Connect(function()
+                    if settings.walkSpeedEnabled then
+                        pcall(function()
+                            local char = plr.Character
+                            if char then
+                                local hum = char:FindFirstChild("Humanoid")
+                                if hum then
+                                    hum.WalkSpeed = settings.walkSpeedValue
+                                end
+                            end
+                        end)
+                    end
+                end)
+            else
+                if walkSpeedConnection then
+                    walkSpeedConnection:Disconnect()
+                    walkSpeedConnection = nil
+                end
+                
+                pcall(function()
+                    local char = plr.Character
+                    if char then
+                        local hum = char:FindFirstChild("Humanoid")
+                        if hum then
+                            hum.WalkSpeed = 16
+                        end
+                    end
+                end)
+            end
+        end
+    })
+
+    Main:Slider({
+        Name = "Speed Value",
+        Flag = "WalkSpeed",
+        Min = 16,
+        Max = 500,
+        Value = 16,
+        Callback = function(value)
+            settings.walkSpeedValue = value
+            if settings.walkSpeedEnabled then
+                pcall(function()
+                    local char = plr.Character
+                    if char then
+                        local hum = char:FindFirstChild("Humanoid")
+                        if hum then
+                            hum.WalkSpeed = value
+                        end
+                    end
+                end)
+            end
+        end
+    })
+
+    Main:Slider({
+        Name = "Jump Power",
+        Flag = "JumpPower",
+        Min = 0,
+        Max = 500,
+        Value = 50,
+        Callback = function(value)
+            settings.jumpPower = value
+            local char = getChar()
+            local hum = char:FindFirstChild("Humanoid")
+            if hum then
+                hum.JumpPower = value
+            end
+        end
+    })
+
+    Main:Toggle({
+        Name = "NoClip",
+        Flag = "Noclip",
+        Value = false,
+        Callback = function(value)
+            settings.noclipEnabled = value
+            
+            if settings.noclipEnabled then
+                noclipConnection = RunService.Stepped:Connect(function()
+                    local char = getChar()
+                    for _, part in pairs(char:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
+                        end
+                    end
+                end)
+            else
+                if noclipConnection then
+                    noclipConnection:Disconnect()
+                end
+                local char = getChar()
+                for _, part in pairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = true
+                    end
+                end
+            end
+        end
+    })
+
+    Main:Section({
+        Name = "Visuals"
+    })
+
+    Main:Toggle({
+        Name = "Remove Fog",
+        Flag = "RemoveFog",
+        Value = false,
+        Callback = function(value)
+            settings.fogEnabled = value
+            
+            if value then
+                oldFog.FogEnd = Lighting.FogEnd
+                oldFog.FogStart = Lighting.FogStart
+                Lighting.FogEnd = 100000
+                Lighting.FogStart = 0
+            else
+                Lighting.FogEnd = oldFog.FogEnd or 10000
+                Lighting.FogStart = oldFog.FogStart or 0
+            end
+        end
+    })
+
+    local tpTool
+    Main:Toggle({
+        Name = "TP Tool",
+        Flag = "TPTool",
+        Value = false,
+        Callback = function(value)
+            settings.tpToolEnabled = value
+            
+            if settings.tpToolEnabled then
+                tpTool = Instance.new("Tool")
+                tpTool.Name = "TP Tool"
+                tpTool.RequiresHandle = false
+                tpTool.CanBeDropped = false
+                
+                tpTool.Activated:Connect(function()
+                    local mouse = plr:GetMouse()
+                    if mouse.Target then
+                        pcall(function()
+                            local char = getChar()
+                            local root = char:FindFirstChild("HumanoidRootPart")
+                            root.CFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0, 3, 0))
+                        end)
+                    end
+                end)
+                
+                tpTool.Parent = plr.Backpack
+                local char = getChar()
+                char.Humanoid:EquipTool(tpTool)
+            else
+                if tpTool then
+                    tpTool:Destroy()
+                    tpTool = nil
+                end
+            end
+        end
+    })
+
+    local espHighlights = {}
+    local espConnections = {}
+
+    local function isKiller(player)
+        if not player or not player.Team then return false end
+        return player.Team.Name == "Killer"
+    end
+
+    local function addPlayerESP(player)
+        if player == plr then return end
+        
+        local function createESP(character)
+            task.wait(0.5)
+            
+            if espHighlights[player] then
+                pcall(function() espHighlights[player]:Destroy() end)
+            end
+            
+            local killer = isKiller(player)
+            
+            local highlight = Instance.new("Highlight")
+            highlight.Name = "ESP_" .. player.Name
+            highlight.Adornee = character
+            highlight.FillColor = killer and settings.killerESPColor or settings.playerESPColor
+            highlight.OutlineColor = killer and settings.killerESPColor or settings.playerESPColor
+            highlight.FillTransparency = 0.5
+            highlight.OutlineTransparency = 0
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            highlight.Parent = character
+            
+            espHighlights[player] = highlight
+            
+            task.spawn(function()
+                while character.Parent and highlight.Parent do
+                    local newKiller = isKiller(player)
+                    if newKiller ~= killer then
+                        killer = newKiller
+                        highlight.FillColor = killer and settings.killerESPColor or settings.playerESPColor
+                        highlight.OutlineColor = killer and settings.killerESPColor or settings.playerESPColor
+                    end
+                    task.wait(3)
+                end
+            end)
+            
+            local hrp = character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local billboard = Instance.new("BillboardGui")
+                billboard.Name = "ESP_Distance_" .. player.Name
+                billboard.Adornee = hrp
+                billboard.Size = UDim2.new(0, 200, 0, 70)
+                billboard.StudsOffset = Vector3.new(0, 3, 0)
+                billboard.AlwaysOnTop = true
+                billboard.Parent = hrp
+                
+                local nameLabel = Instance.new("TextLabel")
+                nameLabel.Size = UDim2.new(1, 0, 0.5, 0)
+                nameLabel.BackgroundTransparency = 1
+                nameLabel.Text = player.Name
+                nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                nameLabel.TextSize = 16
+                nameLabel.Font = Enum.Font.GothamBold
+                nameLabel.TextStrokeTransparency = 0.3
+                nameLabel.Parent = billboard
+                
+                local distLabel = Instance.new("TextLabel")
+                distLabel.Size = UDim2.new(1, 0, 0.5, 0)
+                distLabel.Position = UDim2.new(0, 0, 0.5, 0)
+                distLabel.BackgroundTransparency = 1
+                distLabel.Text = "0m"
+                distLabel.TextColor3 = Color3.fromRGB(0, 255, 255)
+                distLabel.TextSize = 14
+                distLabel.Font = Enum.Font.Gotham
+                distLabel.TextStrokeTransparency = 0.3
+                distLabel.Parent = billboard
+                
+                task.spawn(function()
+                    while billboard.Parent and hrp.Parent do
+                        local char = getChar()
+                        local root = char:FindFirstChild("HumanoidRootPart")
+                        if root then
+                            local dist = (hrp.Position - root.Position).Magnitude
+                            distLabel.Text = string.format("%.1fm", dist)
+                        end
+                        task.wait(2)
+                    end
+                end)
+            end
+        end
+        
+        if player.Character then
+            createESP(player.Character)
+        end
+        local conn = player.CharacterAdded:Connect(createESP)
+        table.insert(espConnections, conn)
+    end
+
+    local function removePlayerESP()
+        for player, highlight in pairs(espHighlights) do
+            pcall(function()
+                highlight:Destroy()
+                local char = player.Character
+                if char then
+                    local billboard = char:FindFirstChild("HumanoidRootPart")
+                    if billboard then
+                        for _, child in pairs(billboard:GetChildren()) do
+                            if child.Name:match("ESP_Distance") then
+                                child:Destroy()
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+        for _, conn in pairs(espConnections) do
+            conn:Disconnect()
+        end
+        espHighlights = {}
+        espConnections = {}
+    end
+
+    local function refreshPlayerESP()
+        if settings.playerESPEnabled then
+            removePlayerESP()
+            for _, p in pairs(Players:GetPlayers()) do
+                addPlayerESP(p)
+            end
+            table.insert(espConnections, Players.PlayerAdded:Connect(addPlayerESP))
+        end
+    end
+
+    ESP:Section({
+        Name = "Player ESP"
+    })
+
+    ESP:Toggle({
+        Name = "Enable Player ESP",
+        Flag = "PlayerESP",
+        Value = false,
+        Callback = function(value)
+            settings.playerESPEnabled = value
+            
+            if settings.playerESPEnabled then
+                for _, p in pairs(Players:GetPlayers()) do
+                    addPlayerESP(p)
+                end
+                table.insert(espConnections, Players.PlayerAdded:Connect(addPlayerESP))
+            else
+                removePlayerESP()
+            end
+        end
+    })
+
+    local generatorHighlights = {}
+    local palletHighlights = {}
+    local hookHighlights = {}
+    local windowHighlights = {}
+    local giftHighlights = {}
+
+    local function deepScan(objectName)
+        local objects = {}
+        local scanned = {}
+        
+        local function scanDescendants(parent)
+            for _, obj in pairs(parent:GetDescendants()) do
+                if not scanned[obj] then
+                    scanned[obj] = true
+                    if obj.Name == objectName then
+                        if obj:IsA("Model") or obj:IsA("BasePart") or obj:IsA("MeshPart") then
+                            table.insert(objects, obj)
+                        end
+                    end
+                end
+            end
+        end
+        
+        scanDescendants(workspace)
+        return objects
+    end
+
+    local function deepScanInFolder(folderName, objectName)
+        local objects = {}
+        local scanned = {}
+        
+        local folder = workspace:FindFirstChild(folderName)
+        if not folder then return objects end
+        
+        local function scanDescendants(parent)
+            for _, obj in pairs(parent:GetDescendants()) do
+                if not scanned[obj] then
+                    scanned[obj] = true
+                    if obj.Name == objectName then
+                        if obj:IsA("Model") or obj:IsA("BasePart") or obj:IsA("MeshPart") then
+                            table.insert(objects, obj)
+                        end
+                    end
+                end
+            end
+        end
+        
+        scanDescendants(folder)
+        return objects
+    end
+
+    local function findGenerators()
+        return deepScan("Generator")
+    end
+
+    local function findWindows()
+        return deepScan("Window")
+    end
+
+    local function findGifts()
+        return deepScanInFolder("Map", "Gift")
+    end
+
+    local function findPallets()
+        return deepScan("Palletwrong")
+    end
+
+    local function findHooks()
+        return deepScan("Hook")
+    end
+
+    local function findFinishLine()
+        return deepScan("Fininshline")
+    end
+
+    local function findChristmasTree()
+        local christmasFolder = workspace:FindFirstChild("Christmas")
+        if christmasFolder then
+            local tree = christmasFolder:FindFirstChild("ChristmasTree")
+            if tree then
+                return tree
+            end
+        end
+        return nil
+    end
+
+    local function addObjectESP(objects, highlightTable, color)
+        for _, obj in pairs(objects) do
+            if not highlightTable[obj] then
+                pcall(function()
+                    local highlight = Instance.new("Highlight")
+                    highlight.Name = "ObjectESP"
+                    highlight.Adornee = obj
+                    highlight.FillColor = color
+                    highlight.OutlineColor = color
+                    highlight.FillTransparency = 0.6
+                    highlight.OutlineTransparency = 0
+                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                    highlight.Parent = obj
+                    highlightTable[obj] = highlight
+                end)
+            end
+        end
+    end
+
+    local function removeObjectESP(highlightTable)
+        for obj, highlight in pairs(highlightTable) do
+            pcall(function() highlight:Destroy() end)
+        end
+        for k in pairs(highlightTable) do
+            highlightTable[k] = nil
+        end
+    end
+
+    local function refreshObjectESP(findFunc, highlightTable, color, enabled)
+        if enabled then
+            removeObjectESP(highlightTable)
+            local objects = findFunc()
+            addObjectESP(objects, highlightTable, color)
+        end
+    end
+
+    ESP:Section({
+        Name = "Object ESP"
+    })
+
+    ESP:Toggle({
+        Name = "Generator ESP",
+        Flag = "GeneratorESP",
+        Value = false,
+        Callback = function(value)
+            settings.generatorESPEnabled = value
+            if value then
+                local generators = findGenerators()
+                addObjectESP(generators, generatorHighlights, settings.generatorESPColor)
+            else
+                removeObjectESP(generatorHighlights)
+            end
+        end
+    })
+
+    ESP:Toggle({
+        Name = "Pallet ESP",
+        Flag = "PalletESP",
+        Value = false,
+        Callback = function(value)
+            settings.palletESPEnabled = value
+            if value then
+                local pallets = findPallets()
+                addObjectESP(pallets, palletHighlights, settings.palletESPColor)
+            else
+                removeObjectESP(palletHighlights)
+            end
+        end
+    })
+
+    ESP:Toggle({
+        Name = "Hook ESP",
+        Flag = "HookESP",
+        Value = false,
+        Callback = function(value)
+            settings.hookESPEnabled = value
+            if value then
+                local hooks = findHooks()
+                addObjectESP(hooks, hookHighlights, settings.hookESPColor)
+            else
+                removeObjectESP(hookHighlights)
+            end
+        end
+    })
+
+    ESP:Toggle({
+        Name = "Window ESP",
+        Flag = "WindowESP",
+        Value = false,
+        Callback = function(value)
+            settings.windowESPEnabled = value
+            if value then
+                local windows = findWindows()
+                addObjectESP(windows, windowHighlights, settings.windowESPColor)
+            else
+                removeObjectESP(windowHighlights)
+            end
+        end
+    })
+
+    ESP:Toggle({
+        Name = "Gift ESP",
+        Flag = "GiftESP",
+        Value = false,
+        Callback = function(value)
+            settings.giftESPEnabled = value
+            if value then
+                local gifts = findGifts()
+                addObjectESP(gifts, giftHighlights, settings.giftESPColor)
+            else
+                removeObjectESP(giftHighlights)
+            end
+        end
+    })
+
+    ESP:Button({
+        Name = "Refresh All ESP",
+        Callback = function()
+            refreshPlayerESP()
+            refreshObjectESP(findGenerators, generatorHighlights, settings.generatorESPColor, settings.generatorESPEnabled)
+            refreshObjectESP(findPallets, palletHighlights, settings.palletESPColor, settings.palletESPEnabled)
+            refreshObjectESP(findHooks, hookHighlights, settings.hookESPColor, settings.hookESPEnabled)
+            refreshObjectESP(findWindows, windowHighlights, settings.windowESPColor, settings.windowESPEnabled)
+            refreshObjectESP(findGifts, giftHighlights, settings.giftESPColor, settings.giftESPEnabled)
+            WindUI:Notify({
+                Title = "ESP Refreshed",
+                Content = "All ESP refreshed successfully!",
+                Duration = 3
+            })
+        end
+    })
+
+    local function isGeneratorComplete(generator)
+        local progressValue = generator:FindFirstChild("Progress")
+        if progressValue and progressValue:IsA("NumberValue") then
+            return progressValue.Value >= 100
+        end
+        
+        local genGui = generator:FindFirstChildOfClass("BillboardGui")
+        if genGui then
+            local textLabel = genGui:FindFirstChildOfClass("TextLabel")
+            if textLabel and textLabel.Text:match("100%%") then
+                return true
+            end
+        end
+        
+        return false
+    end
+
+    local function findGeneratorPoint(generator)
+        for i = 1, 4 do
+            local point = generator:FindFirstChild("GeneratorPoint" .. i)
+            if point then
+                return point
+            end
+        end
+        return nil
+    end
+
+    Teleport:Section({
+        Name = "Teleports"
+    })
+
+    Teleport:Button({
+        Name = "TP to Generator",
+        Callback = function()
+            local generators = findGenerators()
+            local incompleteGens = {}
+            
+            for _, gen in pairs(generators) do
+                if not isGeneratorComplete(gen) then
+                    table.insert(incompleteGens, gen)
+                end
+            end
+            
+            if #incompleteGens > 0 then
+                local randomGen = incompleteGens[math.random(1, #incompleteGens)]
+                local char = getChar()
+                local root = char:FindFirstChild("HumanoidRootPart")
+                
+                if root then
+                    local targetPoint = findGeneratorPoint(randomGen)
+                    local targetPos
+                    
+                    if targetPoint then
+                        targetPos = targetPoint:IsA("BasePart") and targetPoint.Position or targetPoint:GetPivot().Position
+                    else
+                        targetPos = randomGen:IsA("Model") and randomGen:GetPivot().Position or randomGen.Position
+                    end
+                    
+                    root.CFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0))
+                    WindUI:Notify({
+                        Title = "Teleported",
+                        Content = "Teleported to generator!",
+                        Duration = 2
+                    })
+                end
+            else
+                WindUI:Notify({
+                    Title = "Error",
+                    Content = "No generators found!",
+                    Duration = 2
+                })
+            end
+        end
+    })
+
+    local autoCollectRunning = false
+    local autoRepairRunning = false
+    local currentRepairingGen = nil
+    local giftPickingUp = false
+
+    local function autoCollectGifts()
+        while settings.autoCollectGifts do
+            pcall(function()
+                if giftPickingUp then
+                    task.wait(0.5)
+                    return
+                end
+
+                local char = getChar()
+                local root = char:FindFirstChild("HumanoidRootPart")
+                
+                if not root then
+                    task.wait(1)
+                    return
+                end
+                
+                local gifts = findGifts()
+                if #gifts > 0 then
+                    for _, gift in pairs(gifts) do
+                        if not settings.autoCollectGifts then break end
+                        
+                        giftPickingUp = true
+                        local giftPos = gift:IsA("Model") and gift:GetPivot().Position or gift.Position
+                        
+                        root.CFrame = CFrame.new(giftPos + Vector3.new(0, 2, 0))
+                        root.AssemblyLinearVelocity = Vector3.zero
+                        root.AssemblyAngularVelocity = Vector3.zero
+                        task.wait(0.5)
+                        
+                        for i = 1, 3 do
+                            local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                            if remotes then
+                                local events = remotes:FindFirstChild("Events")
+                                if events then
+                                    local christmas = events:FindFirstChild("Christmas")
+                                    if christmas then
+                                        local giftEvent = christmas:FindFirstChild("gift")
+                                        if giftEvent then
+                                            giftEvent:FireServer()
+                                            task.wait(0.1)
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                        
+                        task.wait(0.3)
+                        
+                        local christmasTree = findChristmasTree()
+                        if christmasTree then
+                            local treePos = christmasTree:IsA("Model") and christmasTree:GetPivot().Position or christmasTree.Position
+                            root.CFrame = CFrame.new(treePos + Vector3.new(0, 3, 0))
+                            root.AssemblyLinearVelocity = Vector3.zero
+                            root.AssemblyAngularVelocity = Vector3.zero
+                            task.wait(0.4)
+                            
+                            for i = 1, 3 do
+                                local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                                if remotes then
+                                    local events = remotes:FindFirstChild("Events")
+                                    if events then
+                                        local christmas = events:FindFirstChild("Christmas")
+                                        if christmas then
+                                            local putdown = christmas:FindFirstChild("putdown")
+                                            if putdown then
+                                                putdown:FireServer()
+                                                task.wait(0.1)
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                        
+                        task.wait(settings.giftDelay)
+                        giftPickingUp = false
+                    end
+                else
+                    task.wait(2)
+                end
+            end)
+            task.wait(0.3)
+        end
+        giftPickingUp = false
+    end
+
+    local skillCheckConnection
+    local repairAnimConnection
+
+    local function autoRepairGenerator()
+        while settings.autoRepairEnabled do
+            pcall(function()
+                local generators = findGenerators()
+                local incompleteGens = {}
+                
+                for _, gen in pairs(generators) do
+                    if not isGeneratorComplete(gen) then
+                        table.insert(incompleteGens, gen)
+                    end
+                end
+                
+                if #incompleteGens > 0 and not currentRepairingGen then
+                    local targetGen = incompleteGens[1]
+                    currentRepairingGen = targetGen
+                    
+                    local char = getChar()
+                    local root = char:FindFirstChild("HumanoidRootPart")
+                    
+                    if root then
+                        local targetPoint = findGeneratorPoint(targetGen)
+                        local targetPos
+                        
+                        if targetPoint then
+                            targetPos = targetPoint:IsA("BasePart") and targetPoint.Position or targetPoint:GetPivot().Position
+                        else
+                            targetPos = targetGen:IsA("Model") and targetGen:GetPivot().Position or targetGen.Position
+                        end
+                        
+                        root.CFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0))
+                        root.AssemblyLinearVelocity = Vector3.zero
+                        root.AssemblyAngularVelocity = Vector3.zero
+                        task.wait(0.5)
+                        
+                        local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                        if remotes then
+                            local genFolder = remotes:FindFirstChild("Generator")
+                            if genFolder then
+                                local repairEvent = genFolder:FindFirstChild("RepairEvent")
+                                if repairEvent then
+                                    for i = 1, 2 do
+                                        repairEvent:FireServer(targetGen, true)
+                                        task.wait(0.1)
+                                    end
+                                    
+                                    local startTime = tick()
+                                    while settings.autoRepairEnabled and not isGeneratorComplete(targetGen) and (tick() - startTime) < 30 do
+                                        repairEvent:FireServer(targetGen, true)
+                                        task.wait(1)
+                                    end
+                                    
+                                    if isGeneratorComplete(targetGen) then
+                                        currentRepairingGen = nil
+                                        task.wait(1)
+                                    else
+                                        repairEvent:FireServer(targetGen, false)
+                                        currentRepairingGen = nil
+                                        task.wait(0.5)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                else
+                    if currentRepairingGen and isGeneratorComplete(currentRepairingGen) then
+                        currentRepairingGen = nil
+                    end
+                    task.wait(1)
+                end
+            end)
+            task.wait(0.3)
+        end
+        currentRepairingGen = nil
+    end
+
+    Auto:Section({
+        Name = "Auto Features"
+    })
+
+    Auto:Toggle({
+        Name = "Auto Collect Gifts",
+        Flag = "AutoGift",
+        Value = false,
+        Callback = function(value)
+            settings.autoCollectGifts = value
+            
+            if value then
+                task.spawn(autoCollectGifts)
+                WindUI:Notify({
+                    Title = "Auto Gift",
+                    Content = "Auto gift enabled!",
+                    Duration = 2
+                })
+            end
+        end
+    })
+
+    Auto:Slider({
+        Name = "Gift Delay (s)",
+        Flag = "GiftDelay",
+        Min = 0.5,
+        Max = 5,
+        Value = 2,
+        Callback = function(value)
+            settings.giftDelay = value
+        end
+    })
+
+    Auto:Toggle({
+        Name = "Auto Repair Gen",
+        Flag = "AutoRepair",
+        Value = false,
+        Callback = function(value)
+            settings.autoRepairEnabled = value
+            if value then
+                task.spawn(autoRepairGenerator)
+                WindUI:Notify({
+                    Title = "Auto Repair",
+                    Content = "Auto repair enabled!",
+                    Duration = 2
+                })
+            else
+                currentRepairingGen = nil
+            end
+        end
+    })
+
+    Auto:Toggle({
+        Name = "Anti Fail",
+        Flag = "AntiFail",
+        Value = false,
+        Callback = function(value)
+            settings.antiFail = value
+            
+            if value then
+                local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                if remotes then
+                    local genFolder = remotes:FindFirstChild("Generator")
+                    if genFolder then
+                        local skillCheckEvent = genFolder:FindFirstChild("SkillCheckEvent")
+                        if skillCheckEvent then
+                            if skillCheckConnection then
+                                skillCheckConnection:Disconnect()
+                            end
+                            
+                            skillCheckConnection = skillCheckEvent.OnClientEvent:Connect(function()
+                                task.spawn(function()
+                                    local randomDelay = math.random(30, 80) / 1000
+                                    task.wait(randomDelay)
+                                    
+                                    local resultEvent = genFolder:FindFirstChild("SkillCheckResultEvent")
+                                    if resultEvent then
+                                        for i = 1, 2 do
+                                            resultEvent:FireServer(true)
+                                            task.wait(0.01)
+                                        end
+                                    end
+                                    
+                                    task.wait(0.02)
+                                    local gui = plr.PlayerGui:FindFirstChild("SkillCheck")
+                                    if gui then
+                                        gui.Enabled = false
+                                    end
+                                end)
+                            end)
+                        end
+                    end
+                end
+                WindUI:Notify({
+                    Title = "Anti Fail",
+                    Content = "Anti fail enabled!",
+                    Duration = 2
+                })
+            else
+                if skillCheckConnection then
+                    skillCheckConnection:Disconnect()
+                    skillCheckConnection = nil
+                end
+            end
+        end
+    })
+
+    local function instantWin()
+        local finishLines = findFinishLine()
+        
+        if #finishLines > 0 then
+            local finishLine = finishLines[1]
+            local char = getChar()
+            local root = char:FindFirstChild("HumanoidRootPart")
+            
+            if root then
+                local originalNoclip = settings.noclipEnabled
+                
+                if not noclipConnection then
+                    noclipConnection = RunService.Stepped:Connect(function()
+                        local c = getChar()
+                        for _, part in pairs(c:GetDescendants()) do
+                            if part:IsA("BasePart") then
+                                part.CanCollide = false
+                            end
+                        end
+                    end)
+                end
+                
+                local finishPos = finishLine:IsA("Model") and finishLine:GetPivot().Position or finishLine.Position
+                root.CFrame = CFrame.new(finishPos)
+                
+                task.wait(1)
+                
+                if not originalNoclip and noclipConnection then
+                    noclipConnection:Disconnect()
+                    noclipConnection = nil
+                    local c = getChar()
+                    for _, part in pairs(c:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = true
+                        end
+                    end
+                end
+                
+                WindUI:Notify({
+                    Title = "Instant Win",
+                    Content = "Teleported to finish!",
+                    Duration = 2
+                })
+            end
+        else
+            WindUI:Notify({
+                Title = "Error",
+                Content = "Finish line not found!",
+                Duration = 2
+            })
+        end
+    end
+
+    Auto:Button({
+        Name = "Instant Win",
+        Callback = function()
+            instantWin()
+        end
+    })
+
+    WindUI:Notify({
+        Title = "Violence District",
+        Content = "Script loaded! Key verified.",
+        Duration = 5
+    })
+
+    plr.CharacterAdded:Connect(function()
+        task.wait(1)
+        
+        if settings.walkSpeedEnabled and walkSpeedConnection then
+            walkSpeedConnection:Disconnect()
+            walkSpeedConnection = RunService.Heartbeat:Connect(function()
+                if settings.walkSpeedEnabled then
+                    pcall(function()
+                        local char = plr.Character
+                        if char then
+                            local hum = char:FindFirstChild("Humanoid")
+                            if hum then
+                                hum.WalkSpeed = settings.walkSpeedValue
+                            end
+                        end
+                    end)
+                end
+            end)
+        end
+        
+        if settings.noclipEnabled and noclipConnection then
+            noclipConnection:Disconnect()
+            noclipConnection = RunService.Stepped:Connect(function()
+                local char = getChar()
+                for _, part in pairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end)
+        end
+    end)
+end
+
+while not keyEntered do
+    task.wait(0.1)
+end

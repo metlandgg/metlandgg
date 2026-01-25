@@ -1,0 +1,1590 @@
+-- KEYSYSTEM: "23GG" REQUIRED (Case Insensitive)
+local REQUIRED_KEY = "23GG"
+local keyEntered = false
+
+-- Services
+local Players = game:GetService("Players")
+local plr = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+-- LOADING SCREEN HACKER STYLE
+local function createLoadingScreen()
+    local loadingGui = Instance.new("ScreenGui")
+    loadingGui.Name = "HackerLoading"
+    loadingGui.ResetOnSpawn = false
+    loadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    loadingGui.Parent = plr:WaitForChild("PlayerGui")
+    
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainFrame"
+    mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    mainFrame.Size = UDim2.new(0, 600, 0, 400)
+    mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = loadingGui
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 15)
+    corner.Parent = mainFrame
+    
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(0, 255, 150)
+    stroke.Thickness = 2
+    stroke.Transparency = 0.5
+    stroke.Parent = mainFrame
+    
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 15, 20)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 5, 10))
+    }
+    gradient.Rotation = 45
+    gradient.Parent = mainFrame
+    
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, -40, 0, 50)
+    title.Position = UDim2.new(0, 20, 0, 20)
+    title.BackgroundTransparency = 1
+    title.Text = "VIOLENCE DISTRICT"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextSize = 28
+    title.Font = Enum.Font.Code
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = mainFrame
+    
+    local titleGradient = Instance.new("UIGradient")
+    titleGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 150)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 200, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 0, 255))
+    }
+    titleGradient.Parent = title
+    
+    local subtitle = Instance.new("TextLabel")
+    subtitle.Size = UDim2.new(1, -40, 0, 20)
+    subtitle.Position = UDim2.new(0, 20, 0, 65)
+    subtitle.BackgroundTransparency = 1
+    subtitle.Text = "INITIALIZING SYSTEM..."
+    subtitle.TextColor3 = Color3.fromRGB(0, 255, 150)
+    subtitle.TextSize = 14
+    subtitle.Font = Enum.Font.Code
+    subtitle.TextXAlignment = Enum.TextXAlignment.Left
+    subtitle.Parent = mainFrame
+    
+    local consoleFrame = Instance.new("ScrollingFrame")
+    consoleFrame.Size = UDim2.new(1, -40, 0, 200)
+    consoleFrame.Position = UDim2.new(0, 20, 0, 100)
+    consoleFrame.BackgroundColor3 = Color3.fromRGB(5, 5, 8)
+    consoleFrame.BorderSizePixel = 0
+    consoleFrame.ScrollBarThickness = 4
+    consoleFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    consoleFrame.Parent = mainFrame
+    
+    local consoleCorner = Instance.new("UICorner")
+    consoleCorner.CornerRadius = UDim.new(0, 8)
+    consoleCorner.Parent = consoleFrame
+    
+    local consoleList = Instance.new("UIListLayout")
+    consoleList.Padding = UDim.new(0, 2)
+    consoleList.Parent = consoleFrame
+    
+    local progressBg = Instance.new("Frame")
+    progressBg.Size = UDim2.new(1, -40, 0, 25)
+    progressBg.Position = UDim2.new(0, 20, 0, 315)
+    progressBg.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    progressBg.BorderSizePixel = 0
+    progressBg.Parent = mainFrame
+    
+    local progressCorner = Instance.new("UICorner")
+    progressCorner.CornerRadius = UDim.new(0, 8)
+    progressCorner.Parent = progressBg
+    
+    local progressBar = Instance.new("Frame")
+    progressBar.Size = UDim2.new(0, 0, 1, 0)
+    progressBar.BackgroundColor3 = Color3.fromRGB(0, 255, 150)
+    progressBar.BorderSizePixel = 0
+    progressBar.Parent = progressBg
+    
+    local progressBarCorner = Instance.new("UICorner")
+    progressBarCorner.CornerRadius = UDim.new(0, 8)
+    progressBarCorner.Parent = progressBar
+    
+    local progressGradient = Instance.new("UIGradient")
+    progressGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 150)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 200, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 0, 255))
+    }
+    progressGradient.Parent = progressBar
+    
+    local progressText = Instance.new("TextLabel")
+    progressText.Size = UDim2.new(1, 0, 1, 0)
+    progressText.BackgroundTransparency = 1
+    progressText.Text = "0%"
+    progressText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    progressText.TextSize = 14
+    progressText.Font = Enum.Font.Code
+    progressText.Parent = progressBg
+    
+    local statusText = Instance.new("TextLabel")
+    statusText.Size = UDim2.new(1, -40, 0, 30)
+    statusText.Position = UDim2.new(0, 20, 0, 350)
+    statusText.BackgroundTransparency = 1
+    statusText.Text = "READY TO EXECUTE"
+    statusText.TextColor3 = Color3.fromRGB(0, 255, 150)
+    statusText.TextSize = 16
+    statusText.Font = Enum.Font.Code
+    statusText.TextXAlignment = Enum.TextXAlignment.Center
+    statusText.Parent = mainFrame
+    
+    local function generateRandomHash(length)
+        local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+        local hash = ""
+        for i = 1, length do
+            local rand = math.random(1, #chars)
+            hash = hash .. chars:sub(rand, rand)
+        end
+        return hash
+    end
+    
+    local function addConsoleLine(text, color)
+        local line = Instance.new("TextLabel")
+        line.Size = UDim2.new(1, -10, 0, 18)
+        line.BackgroundTransparency = 1
+        line.Text = "> " .. text
+        line.TextColor3 = color or Color3.fromRGB(0, 255, 150)
+        line.TextSize = 12
+        line.Font = Enum.Font.Code
+        line.TextXAlignment = Enum.TextXAlignment.Left
+        line.TextTransparency = 1
+        line.Parent = consoleFrame
+        
+        consoleFrame.CanvasSize = UDim2.new(0, 0, 0, consoleList.AbsoluteContentSize.Y)
+        consoleFrame.CanvasPosition = Vector2.new(0, consoleList.AbsoluteContentSize.Y)
+        
+        TweenService:Create(line, TweenInfo.new(0.2), {TextTransparency = 0}):Play()
+        
+        return line
+    end
+    
+    local messages = {
+        {"CONNECTING TO NETWORK...", Color3.fromRGB(0, 255, 150)},
+        {"SOCKET_ID: " .. generateRandomHash(16), Color3.fromRGB(100, 100, 100)},
+        {"ESTABLISHING SECURE TUNNEL...", Color3.fromRGB(0, 200, 255)},
+        {"HANDSHAKE: " .. generateRandomHash(24), Color3.fromRGB(100, 100, 100)},
+        {"BYPASSING GAME SECURITY...", Color3.fromRGB(255, 200, 0)},
+        {"EXPLOIT_KEY: " .. generateRandomHash(20), Color3.fromRGB(100, 100, 100)},
+        {"INJECTING CORE MODULES...", Color3.fromRGB(0, 255, 150)},
+        {"MODULE_ID: " .. generateRandomHash(22), Color3.fromRGB(100, 100, 100)},
+        {"LOADING ESP SYSTEMS...", Color3.fromRGB(0, 200, 255)},
+        {"ESP_SIGNATURE: " .. generateRandomHash(16), Color3.fromRGB(100, 100, 100)},
+        {"HOOKING REMOTE EVENTS...", Color3.fromRGB(150, 0, 255)},
+        {"HOOK_ADDR: " .. generateRandomHash(24), Color3.fromRGB(100, 100, 100)},
+        {"VERIFYING CREDENTIALS...", Color3.fromRGB(0, 200, 255)},
+        {"AUTH_TOKEN: " .. generateRandomHash(28), Color3.fromRGB(100, 100, 100)},
+        {"USER DETECTED: " .. plr.Name, Color3.fromRGB(0, 255, 255)},
+        {"USER_ID: " .. plr.UserId, Color3.fromRGB(100, 100, 100)},
+        {"ACCESS GRANTED!", Color3.fromRGB(0, 255, 0)},
+        {"SESSION_KEY: " .. generateRandomHash(32), Color3.fromRGB(100, 100, 100)},
+        {"ALL SYSTEMS OPERATIONAL", Color3.fromRGB(0, 255, 150)}
+    }
+    
+    task.spawn(function()
+        local totalTime = 10
+        local delayPerMessage = totalTime / #messages
+        
+        for i, msg in ipairs(messages) do
+            addConsoleLine(msg[1], msg[2])
+            
+            local progress = (i / #messages) * 100
+            progressText.Text = math.floor(progress) .. "%"
+            
+            TweenService:Create(progressBar, TweenInfo.new(0.3), {
+                Size = UDim2.new(progress / 100, 0, 1, 0)
+            }):Play()
+            
+            if i == #messages then
+                statusText.Text = "EXECUTION COMPLETE"
+                statusText.TextColor3 = Color3.fromRGB(0, 255, 0)
+            end
+            
+            task.wait(delayPerMessage)
+        end
+        
+        task.wait(1)
+        
+        TweenService:Create(mainFrame, TweenInfo.new(0.5), {
+            Position = UDim2.new(0.5, 0, -0.5, 0)
+        }):Play()
+        
+        task.wait(0.5)
+        loadingGui:Destroy()
+    end)
+    
+    return loadingGui
+end
+
+-- KEY FRAME
+local keypadUI = Instance.new("ScreenGui")
+keypadUI.Name = "KeypadUI"
+keypadUI.ResetOnSpawn = false
+keypadUI.Parent = plr:WaitForChild("PlayerGui")
+
+local keyFrame = Instance.new("Frame")
+keyFrame.Name = "KeyFrame"
+keyFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+keyFrame.Size = UDim2.new(0, 400, 0, 280)
+keyFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+keyFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+keyFrame.BorderSizePixel = 0
+keyFrame.Parent = keypadUI
+
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0, 20)
+frameCorner.Parent = keyFrame
+
+local frameGradient = Instance.new("UIGradient")
+frameGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 20, 30)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 10, 15))
+}
+frameGradient.Rotation = 135
+frameGradient.Parent = keyFrame
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, -40, 0, 60)
+titleLabel.Position = UDim2.new(0, 20, 0, 20)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "METLANDGG SCRIPT"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextSize = 32
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextXAlignment = Enum.TextXAlignment.Center
+titleLabel.Parent = keyFrame
+
+local titleGradient = Instance.new("UIGradient")
+titleGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 150)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 200, 255)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 255, 0))
+}
+titleGradient.Parent = titleLabel
+
+task.spawn(function()
+    while titleLabel.Parent do
+        for i = 0, 360, 3 do
+            if not titleLabel.Parent then break end
+            titleGradient.Rotation = i
+            task.wait(0.03)
+        end
+    end
+end)
+
+local subtitleLabel = Instance.new("TextLabel")
+subtitleLabel.Size = UDim2.new(1, -40, 0, 25)
+subtitleLabel.Position = UDim2.new(0, 20, 0, 80)
+subtitleLabel.BackgroundTransparency = 1
+subtitleLabel.Text = "Enter Access Key"
+subtitleLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+subtitleLabel.TextSize = 14
+subtitleLabel.Font = Enum.Font.Gotham
+subtitleLabel.TextXAlignment = Enum.TextXAlignment.Center
+subtitleLabel.Parent = keyFrame
+
+local inputBox = Instance.new("TextBox")
+inputBox.Name = "InputBox"
+inputBox.Size = UDim2.new(1, -60, 0, 50)
+inputBox.Position = UDim2.new(0, 30, 0, 120)
+inputBox.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+inputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+inputBox.Text = ""
+inputBox.PlaceholderText = "Enter key here..."
+inputBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
+inputBox.TextSize = 18
+inputBox.Font = Enum.Font.GothamMedium
+inputBox.BorderSizePixel = 0
+inputBox.Parent = keyFrame
+inputBox.ClearTextOnFocus = false
+
+local inputCorner = Instance.new("UICorner")
+inputCorner.CornerRadius = UDim.new(0, 12)
+inputCorner.Parent = inputBox
+
+local inputStroke = Instance.new("UIStroke")
+inputStroke.Color = Color3.fromRGB(50, 50, 70)
+inputStroke.Thickness = 2
+inputStroke.Parent = inputBox
+
+local submitButton = Instance.new("TextButton")
+submitButton.Name = "SubmitButton"
+submitButton.Size = UDim2.new(0.45, -10, 0, 45)
+submitButton.Position = UDim2.new(0.05, 0, 0, 190)
+submitButton.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+submitButton.Text = "SUBMIT"
+submitButton.TextSize = 16
+submitButton.Font = Enum.Font.GothamBold
+submitButton.BorderSizePixel = 0
+submitButton.Parent = keyFrame
+
+local submitCorner = Instance.new("UICorner")
+submitCorner.CornerRadius = UDim.new(0, 12)
+submitCorner.Parent = submitButton
+
+local cancelButton = Instance.new("TextButton")
+cancelButton.Name = "CancelButton"
+cancelButton.Size = UDim2.new(0.45, -10, 0, 45)
+cancelButton.Position = UDim2.new(0.5, 5, 0, 190)
+cancelButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+cancelButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+cancelButton.Text = "EXIT"
+cancelButton.TextSize = 16
+cancelButton.Font = Enum.Font.GothamBold
+cancelButton.BorderSizePixel = 0
+cancelButton.Parent = keyFrame
+
+local cancelCorner = Instance.new("UICorner")
+cancelCorner.CornerRadius = UDim.new(0, 12)
+cancelCorner.Parent = cancelButton
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Name = "StatusLabel"
+statusLabel.Size = UDim2.new(1, -40, 0, 25)
+statusLabel.Position = UDim2.new(0, 20, 0, 245)
+statusLabel.BackgroundTransparency = 1
+statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+statusLabel.Text = ""
+statusLabel.TextSize = 13
+statusLabel.Font = Enum.Font.GothamMedium
+statusLabel.TextXAlignment = Enum.TextXAlignment.Center
+statusLabel.Parent = keyFrame
+
+submitButton.MouseEnter:Connect(function()
+    TweenService:Create(submitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 255, 150)}):Play()
+end)
+
+submitButton.MouseLeave:Connect(function()
+    TweenService:Create(submitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 200, 100)}):Play()
+end)
+
+cancelButton.MouseEnter:Connect(function()
+    TweenService:Create(cancelButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 70, 70)}):Play()
+end)
+
+cancelButton.MouseLeave:Connect(function()
+    TweenService:Create(cancelButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(200, 50, 50)}):Play()
+end)
+
+submitButton.MouseButton1Click:Connect(function()
+    if inputBox.Text:upper() == REQUIRED_KEY:upper() then
+        keyEntered = true
+        keypadUI:Destroy()
+        createLoadingScreen()
+        task.wait(11)
+        loadMainScript()
+    else
+        statusLabel.Text = "❌ Wrong key!"
+        statusLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+        inputBox.Text = ""
+        task.wait(2)
+        statusLabel.Text = ""
+    end
+end)
+
+cancelButton.MouseButton1Click:Connect(function()
+    plr:Kick("Key cancelled by user")
+end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)  
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.Return then
+        submitButton.MouseButton1Click:Fire()
+    end
+end)
+
+function loadMainScript()
+    repeat task.wait() until game:IsLoaded()
+    task.wait(0.5)
+
+    local Lighting = game:GetService("Lighting")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+    -- AUTO SCALE DETECTION
+    local function getScaleFactor()
+        local viewportSize = workspace.CurrentCamera.ViewportSize
+        local aspectRatio = viewportSize.X / viewportSize.Y
+        
+        if viewportSize.X < 600 then
+            return 0.75
+        elseif aspectRatio < 1 then
+            return 0.8
+        elseif viewportSize.X < 1000 then
+            return 0.85
+        else
+            return 1
+        end
+    end
+
+    local scaleFactor = getScaleFactor()
+
+    -- CREATE MAIN UI
+    local mainGui = Instance.new("ScreenGui")
+    mainGui.Name = "ViolenceDistrictUI"
+    mainGui.ResetOnSpawn = false
+    mainGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    mainGui.IgnoreGuiInset = true
+    
+    local success = pcall(function()
+        mainGui.Parent = game:GetService("CoreGui")
+    end)
+    
+    if not success then
+        mainGui.Parent = plr:WaitForChild("PlayerGui")
+    end
+
+    -- Main Frame
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainFrame"
+    mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    mainFrame.Size = UDim2.new(0, 550 * scaleFactor, 0, 450 * scaleFactor)
+    mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = mainGui
+
+    local mainCorner = Instance.new("UICorner")
+    mainCorner.CornerRadius = UDim.new(0, 15)
+    mainCorner.Parent = mainFrame
+
+    local mainStroke = Instance.new("UIStroke")
+    mainStroke.Color = Color3.fromRGB(0, 255, 150)
+    mainStroke.Thickness = 2
+    mainStroke.Transparency = 0.5
+    mainStroke.Parent = mainFrame
+
+    -- Title Bar
+    local titleBar = Instance.new("Frame")
+    titleBar.Name = "TitleBar"
+    titleBar.Size = UDim2.new(1, 0, 0, 50)
+    titleBar.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    titleBar.BorderSizePixel = 0
+    titleBar.Parent = mainFrame
+
+    local titleCorner = Instance.new("UICorner")
+    titleCorner.CornerRadius = UDim.new(0, 15)
+    titleCorner.Parent = titleBar
+
+    local titleBarBottom = Instance.new("Frame")
+    titleBarBottom.Size = UDim2.new(1, 0, 0, 15)
+    titleBarBottom.Position = UDim2.new(0, 0, 1, -15)
+    titleBarBottom.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    titleBarBottom.BorderSizePixel = 0
+    titleBarBottom.Parent = titleBar
+
+    local titleText = Instance.new("TextLabel")
+    titleText.Size = UDim2.new(1, -100, 1, 0)
+    titleText.Position = UDim2.new(0, 20, 0, 0)
+    titleText.BackgroundTransparency = 1
+    titleText.Text = "Violence District | by metlandgg"
+    titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleText.TextSize = 18 * scaleFactor
+    titleText.Font = Enum.Font.GothamBold
+    titleText.TextXAlignment = Enum.TextXAlignment.Left
+    titleText.Parent = titleBar
+
+    local titleGradientMain = Instance.new("UIGradient")
+    titleGradientMain.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 150)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 200, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 255, 0))
+    }
+    titleGradientMain.Parent = titleText
+
+    task.spawn(function()
+        while titleText.Parent do
+            for i = 0, 360, 2 do
+                if not titleText.Parent then break end
+                titleGradientMain.Rotation = i
+                task.wait(0.02)
+            end
+        end
+    end)
+
+    -- Close/Minimize buttons
+    local minimizeButton = Instance.new("TextButton")
+    minimizeButton.Size = UDim2.new(0, 35 * scaleFactor, 0, 35 * scaleFactor)
+    minimizeButton.Position = UDim2.new(1, -80 * scaleFactor, 0, 7.5 * scaleFactor)
+    minimizeButton.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+    minimizeButton.BorderSizePixel = 0
+    minimizeButton.Text = "—"
+    minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    minimizeButton.TextSize = 20 * scaleFactor
+    minimizeButton.Font = Enum.Font.GothamBold
+    minimizeButton.ZIndex = 100
+    minimizeButton.Active = true
+    minimizeButton.AutoButtonColor = false
+    minimizeButton.Parent = titleBar
+
+    local minimizeBtnCorner = Instance.new("UICorner")
+    minimizeBtnCorner.CornerRadius = UDim.new(0, 8)
+    minimizeBtnCorner.Parent = minimizeButton
+
+    local closeButton = Instance.new("TextButton")
+    closeButton.Size = UDim2.new(0, 35 * scaleFactor, 0, 35 * scaleFactor)
+    closeButton.Position = UDim2.new(1, -42 * scaleFactor, 0, 7.5 * scaleFactor)
+    closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    closeButton.BorderSizePixel = 0
+    closeButton.Text = "X"
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.TextSize = 18 * scaleFactor
+    closeButton.Font = Enum.Font.GothamBold
+    closeButton.ZIndex = 100
+    closeButton.Active = true
+    closeButton.AutoButtonColor = false
+    closeButton.Parent = titleBar
+
+    local closeBtnCorner = Instance.new("UICorner")
+    closeBtnCorner.CornerRadius = UDim.new(0, 8)
+    closeBtnCorner.Parent = closeButton
+
+    local isMinimized = false
+    local originalSize = UDim2.new(0, 550 * scaleFactor, 0, 450 * scaleFactor)
+    local minimizedSize = UDim2.new(0, 280 * scaleFactor, 0, 50)
+
+    minimizeButton.MouseEnter:Connect(function()
+        TweenService:Create(minimizeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 220, 50)}):Play()
+    end)
+
+    minimizeButton.MouseLeave:Connect(function()
+        TweenService:Create(minimizeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 200, 0)}):Play()
+    end)
+
+    closeButton.MouseEnter:Connect(function()
+        TweenService:Create(closeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 70, 70)}):Play()
+    end)
+
+    closeButton.MouseLeave:Connect(function()
+        TweenService:Create(closeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(200, 50, 50)}):Play()
+    end)
+
+    minimizeButton.MouseButton1Click:Connect(function()
+        isMinimized = not isMinimized
+        
+        if isMinimized then
+            -- MINIMIZE: Hide containers and shrink
+            tabContainer.Visible = false
+            contentContainer.Visible = false
+            mainFrame.Size = minimizedSize
+            minimizeButton.Text = "□"
+        else
+            -- MAXIMIZE: Restore size and show containers
+            mainFrame.Size = originalSize
+            tabContainer.Visible = true
+            contentContainer.Visible = true
+            minimizeButton.Text = "—"
+        end
+    end)
+
+    closeButton.MouseButton1Click:Connect(function()
+        mainGui:Destroy()
+    end)
+
+    minimizeButton.MouseEnter:Connect(function()
+        TweenService:Create(minimizeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 220, 50)}):Play()
+    end)
+
+    minimizeButton.MouseLeave:Connect(function()
+        TweenService:Create(minimizeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 200, 0)}):Play()
+    end)
+
+    closeButton.MouseEnter:Connect(function()
+        TweenService:Create(closeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 70, 70)}):Play()
+    end)
+
+    closeButton.MouseLeave:Connect(function()
+        TweenService:Create(closeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(200, 50, 50)}):Play()
+    end)
+
+    -- Tab Container
+    local tabContainer = Instance.new("Frame")
+    tabContainer.Name = "TabContainer"
+    tabContainer.Size = UDim2.new(0, 120 * scaleFactor, 1, -60)
+    tabContainer.Position = UDim2.new(0, 10, 0, 55)
+    tabContainer.BackgroundTransparency = 1
+    tabContainer.Parent = mainFrame
+    tabContainer.Visible = true
+
+    local tabList = Instance.new("UIListLayout")
+    tabList.Padding = UDim.new(0, 8)
+    tabList.Parent = tabContainer
+
+    -- Content Container
+    local contentContainer = Instance.new("Frame")
+    contentContainer.Name = "ContentContainer"
+    contentContainer.Size = UDim2.new(1, -(140 * scaleFactor), 1, -70)
+    contentContainer.Position = UDim2.new(0, 130 * scaleFactor, 0, 60)
+    contentContainer.BackgroundTransparency = 1
+    contentContainer.Parent = mainFrame
+    contentContainer.Visible = true
+    contentContainer.Parent = mainFrame
+
+    local settings = {
+        walkSpeedValue = 16,
+        walkSpeedEnabled = false,
+        jumpPower = 50,
+        noclipEnabled = false,
+        fogEnabled = false,
+        playerESPEnabled = false,
+        generatorESPEnabled = false,
+        palletESPEnabled = false,
+        hookESPEnabled = false,
+        windowESPEnabled = false,
+        tpToolEnabled = false,
+        autoRepairEnabled = false,
+        antiFail = false
+    }
+
+    local function getChar()
+        return plr.Character or plr.CharacterAdded:Wait()
+    end
+
+    local currentTab = nil
+    local tabs = {}
+
+    -- Create Tab Function
+    local function createTab(name)
+        local tabButton = Instance.new("TextButton")
+        tabButton.Name = name .. "Tab"
+        tabButton.Size = UDim2.new(1, 0, 0, 35 * scaleFactor)
+        tabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+        tabButton.BorderSizePixel = 0
+        tabButton.Text = name
+        tabButton.TextColor3 = Color3.fromRGB(150, 150, 150)
+        tabButton.TextSize = 14 * scaleFactor
+        tabButton.Font = Enum.Font.GothamBold
+        tabButton.Parent = tabContainer
+
+        local tabCorner = Instance.new("UICorner")
+        tabCorner.CornerRadius = UDim.new(0, 8)
+        tabCorner.Parent = tabButton
+
+        local tabContent = Instance.new("ScrollingFrame")
+        tabContent.Name = name .. "Content"
+        tabContent.Size = UDim2.new(1, 0, 1, 0)
+        tabContent.BackgroundTransparency = 1
+        tabContent.BorderSizePixel = 0
+        tabContent.ScrollBarThickness = 4
+        tabContent.Visible = false
+        tabContent.CanvasSize = UDim2.new(0, 0, 0, 0)
+        tabContent.Parent = contentContainer
+
+        local contentList = Instance.new("UIListLayout")
+        contentList.Padding = UDim.new(0, 10)
+        contentList.Parent = tabContent
+
+        contentList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            tabContent.CanvasSize = UDim2.new(0, 0, 0, contentList.AbsoluteContentSize.Y + 10)
+        end)
+
+        tabs[name] = {button = tabButton, content = tabContent}
+
+        tabButton.MouseButton1Click:Connect(function()
+            for _, tab in pairs(tabs) do
+                tab.button.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+                tab.button.TextColor3 = Color3.fromRGB(150, 150, 150)
+                tab.content.Visible = false
+            end
+
+            tabButton.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+            tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+            tabContent.Visible = true
+            currentTab = name
+        end)
+
+        return tabContent
+    end
+
+    -- Create Toggle
+    local function createToggle(parent, name, callback)
+        local toggleFrame = Instance.new("Frame")
+        toggleFrame.Name = name .. "Toggle"
+        toggleFrame.Size = UDim2.new(1, -10, 0, 40 * scaleFactor)
+        toggleFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+        toggleFrame.BorderSizePixel = 0
+        toggleFrame.Parent = parent
+
+        local toggleCorner = Instance.new("UICorner")
+        toggleCorner.CornerRadius = UDim.new(0, 8)
+        toggleCorner.Parent = toggleFrame
+
+        local toggleLabel = Instance.new("TextLabel")
+        toggleLabel.Size = UDim2.new(1, -60, 1, 0)
+        toggleLabel.Position = UDim2.new(0, 10, 0, 0)
+        toggleLabel.BackgroundTransparency = 1
+        toggleLabel.Text = name
+        toggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        toggleLabel.TextSize = 14 * scaleFactor
+        toggleLabel.Font = Enum.Font.Gotham
+        toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+        toggleLabel.Parent = toggleFrame
+
+        local toggleButton = Instance.new("TextButton")
+        toggleButton.Size = UDim2.new(0, 40 * scaleFactor, 0, 20 * scaleFactor)
+        toggleButton.Position = UDim2.new(1, -50 * scaleFactor, 0.5, -10 * scaleFactor)
+        toggleButton.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+        toggleButton.BorderSizePixel = 0
+        toggleButton.Text = ""
+        toggleButton.Parent = toggleFrame
+
+        local toggleBtnCorner = Instance.new("UICorner")
+        toggleBtnCorner.CornerRadius = UDim.new(1, 0)
+        toggleBtnCorner.Parent = toggleButton
+
+        local toggleIndicator = Instance.new("Frame")
+        toggleIndicator.Size = UDim2.new(0, 16 * scaleFactor, 0, 16 * scaleFactor)
+        toggleIndicator.Position = UDim2.new(0, 2 * scaleFactor, 0.5, -8 * scaleFactor)
+        toggleIndicator.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+        toggleIndicator.BorderSizePixel = 0
+        toggleIndicator.Parent = toggleButton
+
+        local indicatorCorner = Instance.new("UICorner")
+        indicatorCorner.CornerRadius = UDim.new(1, 0)
+        indicatorCorner.Parent = toggleIndicator
+
+        local isToggled = false
+
+        toggleButton.MouseButton1Click:Connect(function()
+            isToggled = not isToggled
+
+            if isToggled then
+                TweenService:Create(toggleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 200, 100)}):Play()
+                TweenService:Create(toggleIndicator, TweenInfo.new(0.2), {Position = UDim2.new(1, -18 * scaleFactor, 0.5, -8 * scaleFactor), BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+            else
+                TweenService:Create(toggleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 55)}):Play()
+                TweenService:Create(toggleIndicator, TweenInfo.new(0.2), {Position = UDim2.new(0, 2 * scaleFactor, 0.5, -8 * scaleFactor), BackgroundColor3 = Color3.fromRGB(200, 200, 200)}):Play()
+            end
+
+            callback(isToggled)
+        end)
+
+        return toggleFrame
+    end
+
+    -- Create Slider
+    local function createSlider(parent, name, min, max, default, callback)
+        local sliderFrame = Instance.new("Frame")
+        sliderFrame.Name = name .. "Slider"
+        sliderFrame.Size = UDim2.new(1, -10, 0, 60 * scaleFactor)
+        sliderFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+        sliderFrame.BorderSizePixel = 0
+        sliderFrame.Parent = parent
+
+        local sliderCorner = Instance.new("UICorner")
+        sliderCorner.CornerRadius = UDim.new(0, 8)
+        sliderCorner.Parent = sliderFrame
+
+        local sliderLabel = Instance.new("TextLabel")
+        sliderLabel.Size = UDim2.new(1, -20, 0, 20)
+        sliderLabel.Position = UDim2.new(0, 10, 0, 5)
+        sliderLabel.BackgroundTransparency = 1
+        sliderLabel.Text = name .. ": " .. default
+        sliderLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        sliderLabel.TextSize = 14 * scaleFactor
+        sliderLabel.Font = Enum.Font.Gotham
+        sliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+        sliderLabel.Parent = sliderFrame
+
+        local sliderBg = Instance.new("Frame")
+        sliderBg.Size = UDim2.new(1, -20, 0, 6 * scaleFactor)
+        sliderBg.Position = UDim2.new(0, 10, 1, -15 * scaleFactor)
+        sliderBg.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
+        sliderBg.BorderSizePixel = 0
+        sliderBg.Parent = sliderFrame
+
+        local sliderBgCorner = Instance.new("UICorner")
+        sliderBgCorner.CornerRadius = UDim.new(1, 0)
+        sliderBgCorner.Parent = sliderBg
+
+        local sliderFill = Instance.new("Frame")
+        sliderFill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+        sliderFill.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        sliderFill.BorderSizePixel = 0
+        sliderFill.Parent = sliderBg
+
+        local sliderFillCorner = Instance.new("UICorner")
+        sliderFillCorner.CornerRadius = UDim.new(1, 0)
+        sliderFillCorner.Parent = sliderFill
+
+        local sliderButton = Instance.new("TextButton")
+        sliderButton.Size = UDim2.new(1, 0, 1, 0)
+        sliderButton.BackgroundTransparency = 1
+        sliderButton.Text = ""
+        sliderButton.Parent = sliderBg
+
+        local dragging = false
+
+        sliderButton.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+            end
+        end)
+
+        sliderButton.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = false
+            end
+        end)
+
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                local relativePos = math.clamp((input.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
+                local value = math.floor(min + (max - min) * relativePos)
+
+                sliderFill.Size = UDim2.new(relativePos, 0, 1, 0)
+                sliderLabel.Text = name .. ": " .. value
+
+                callback(value)
+            end
+        end)
+
+        return sliderFrame
+    end
+
+    -- Create Button
+    local function createButton(parent, name, callback)
+        local buttonFrame = Instance.new("TextButton")
+        buttonFrame.Name = name .. "Button"
+        buttonFrame.Size = UDim2.new(1, -10, 0, 40 * scaleFactor)
+        buttonFrame.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+        buttonFrame.BorderSizePixel = 0
+        buttonFrame.Text = name
+        buttonFrame.TextColor3 = Color3.fromRGB(255, 255, 255)
+        buttonFrame.TextSize = 14 * scaleFactor
+        buttonFrame.Font = Enum.Font.GothamBold
+        buttonFrame.Parent = parent
+
+        local buttonCorner = Instance.new("UICorner")
+        buttonCorner.CornerRadius = UDim.new(0, 8)
+        buttonCorner.Parent = buttonFrame
+
+        buttonFrame.MouseButton1Click:Connect(callback)
+
+        buttonFrame.MouseEnter:Connect(function()
+            TweenService:Create(buttonFrame, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 180, 255)}):Play()
+        end)
+
+        buttonFrame.MouseLeave:Connect(function()
+            TweenService:Create(buttonFrame, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 150, 255)}):Play()
+        end)
+
+        return buttonFrame
+    end
+
+    -- Create Tabs
+    local mainTab = createTab("Main")
+    local espTab = createTab("ESP")
+    local teleportTab = createTab("Teleport")
+    local autoTab = createTab("Auto")
+
+    -- MAIN TAB CONTENT
+    local oldFog = {}
+    local noclipConnection
+    local walkSpeedConnection
+
+    createToggle(mainTab, "Walk Speed", function(value)
+        settings.walkSpeedEnabled = value
+
+        if value then
+            if walkSpeedConnection then
+                walkSpeedConnection:Disconnect()
+            end
+
+            walkSpeedConnection = RunService.Heartbeat:Connect(function()
+                if settings.walkSpeedEnabled then
+                    pcall(function()
+                        local char = plr.Character
+                        if char then
+                            local hum = char:FindFirstChild("Humanoid")
+                            if hum then
+                                hum.WalkSpeed = settings.walkSpeedValue
+                            end
+                        end
+                    end)
+                end
+            end)
+        else
+            if walkSpeedConnection then
+                walkSpeedConnection:Disconnect()
+                walkSpeedConnection = nil
+            end
+
+            pcall(function()
+                local char = plr.Character
+                if char then
+                    local hum = char:FindFirstChild("Humanoid")
+                    if hum then
+                        hum.WalkSpeed = 16
+                    end
+                end
+            end)
+        end
+    end)
+
+    createSlider(mainTab, "Speed Value", 16, 500, 16, function(value)
+        settings.walkSpeedValue = value
+        if settings.walkSpeedEnabled then
+            pcall(function()
+                local char = plr.Character
+                if char then
+                    local hum = char:FindFirstChild("Humanoid")
+                    if hum then
+                        hum.WalkSpeed = value
+                    end
+                end
+            end)
+        end
+    end)
+
+    createSlider(mainTab, "Jump Power", 0, 500, 50, function(value)
+        settings.jumpPower = value
+        local char = getChar()
+        local hum = char:FindFirstChild("Humanoid")
+        if hum then
+            hum.JumpPower = value
+        end
+    end)
+
+    createToggle(mainTab, "NoClip", function(value)
+        settings.noclipEnabled = value
+
+        if settings.noclipEnabled then
+            noclipConnection = RunService.Stepped:Connect(function()
+                local char = getChar()
+                for _, part in pairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end)
+        else
+            if noclipConnection then
+                noclipConnection:Disconnect()
+            end
+            local char = getChar()
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end
+    end)
+
+    createToggle(mainTab, "Remove Fog", function(value)
+        settings.fogEnabled = value
+
+        if value then
+            oldFog.FogEnd = Lighting.FogEnd
+            oldFog.FogStart = Lighting.FogStart
+            Lighting.FogEnd = 100000
+            Lighting.FogStart = 0
+        else
+            Lighting.FogEnd = oldFog.FogEnd or 10000
+            Lighting.FogStart = oldFog.FogStart or 0
+        end
+    end)
+
+    local tpTool
+    createToggle(mainTab, "TP Tool", function(value)
+        settings.tpToolEnabled = value
+
+        if settings.tpToolEnabled then
+            tpTool = Instance.new("Tool")
+            tpTool.Name = "TP Tool"
+            tpTool.RequiresHandle = false
+            tpTool.CanBeDropped = false
+
+            tpTool.Activated:Connect(function()
+                local mouse = plr:GetMouse()
+                if mouse.Target then
+                    pcall(function()
+                        local char = getChar()
+                        local root = char:FindFirstChild("HumanoidRootPart")
+                        root.CFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0, 3, 0))
+                    end)
+                end
+            end)
+
+            tpTool.Parent = plr.Backpack
+            local char = getChar()
+            char.Humanoid:EquipTool(tpTool)
+        else
+            if tpTool then
+                tpTool:Destroy()
+                tpTool = nil
+            end
+        end
+    end)
+
+    -- ESP TAB CONTENT
+    local espHighlights = {}
+    local espConnections = {}
+
+    local function isKiller(player)
+        if not player or not player.Team then return false end
+        return player.Team.Name == "Killer"
+    end
+
+    local function addPlayerESP(player)
+        if player == plr then return end
+
+        local function createESP(character)
+            task.wait(0.5)
+
+            if espHighlights[player] then
+                pcall(function() espHighlights[player]:Destroy() end)
+            end
+
+            local killer = isKiller(player)
+
+            local highlight = Instance.new("Highlight")
+            highlight.Name = "ESP_" .. player.Name
+            highlight.Adornee = character
+            highlight.FillColor = killer and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 255, 0)
+            highlight.OutlineColor = killer and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 255, 0)
+            highlight.FillTransparency = 0.5
+            highlight.OutlineTransparency = 0
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            highlight.Parent = character
+
+            espHighlights[player] = highlight
+
+            task.spawn(function()
+                while character.Parent and highlight.Parent do
+                    local newKiller = isKiller(player)
+                    if newKiller ~= killer then
+                        killer = newKiller
+                        highlight.FillColor = killer and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 255, 0)
+                        highlight.OutlineColor = killer and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 255, 0)
+                    end
+                    task.wait(3)
+                end
+            end)
+
+            local hrp = character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local billboard = Instance.new("BillboardGui")
+                billboard.Name = "ESP_Distance_" .. player.Name
+                billboard.Adornee = hrp
+                billboard.Size = UDim2.new(0, 200, 0, 70)
+                billboard.StudsOffset = Vector3.new(0, 3, 0)
+                billboard.AlwaysOnTop = true
+                billboard.Parent = hrp
+
+                local nameLabel = Instance.new("TextLabel")
+                nameLabel.Size = UDim2.new(1, 0, 0.5, 0)
+                nameLabel.BackgroundTransparency = 1
+                nameLabel.Text = player.Name
+                nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                nameLabel.TextSize = 16
+                nameLabel.Font = Enum.Font.GothamBold
+                nameLabel.TextStrokeTransparency = 0.3
+                nameLabel.Parent = billboard
+
+                local distLabel = Instance.new("TextLabel")
+                distLabel.Size = UDim2.new(1, 0, 0.5, 0)
+                distLabel.Position = UDim2.new(0, 0, 0.5, 0)
+                distLabel.BackgroundTransparency = 1
+                distLabel.Text = "0m"
+                distLabel.TextColor3 = Color3.fromRGB(0, 255, 255)
+                distLabel.TextSize = 14
+                distLabel.Font = Enum.Font.Gotham
+                distLabel.TextStrokeTransparency = 0.3
+                distLabel.Parent = billboard
+
+                task.spawn(function()
+                    while billboard.Parent and hrp.Parent do
+                        local char = getChar()
+                        local root = char:FindFirstChild("HumanoidRootPart")
+                        if root then
+                            local dist = (hrp.Position - root.Position).Magnitude
+                            distLabel.Text = string.format("%.1fm", dist)
+                        end
+                        task.wait(2)
+                    end
+                end)
+            end
+        end
+
+        if player.Character then
+            createESP(player.Character)
+        end
+        local conn = player.CharacterAdded:Connect(createESP)
+        table.insert(espConnections, conn)
+    end
+
+    local function removePlayerESP()
+        for player, highlight in pairs(espHighlights) do
+            pcall(function()
+                highlight:Destroy()
+                local char = player.Character
+                if char then
+                    local billboard = char:FindFirstChild("HumanoidRootPart")
+                    if billboard then
+                        for _, child in pairs(billboard:GetChildren()) do
+                            if child.Name:match("ESP_Distance") then
+                                child:Destroy()
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+        for _, conn in pairs(espConnections) do
+            conn:Disconnect()
+        end
+        espHighlights = {}
+        espConnections = {}
+    end
+
+    local function refreshPlayerESP()
+        if settings.playerESPEnabled then
+            removePlayerESP()
+            for _, p in pairs(Players:GetPlayers()) do
+                addPlayerESP(p)
+            end
+            table.insert(espConnections, Players.PlayerAdded:Connect(addPlayerESP))
+        end
+    end
+
+    createToggle(espTab, "Player ESP", function(value)
+        settings.playerESPEnabled = value
+
+        if settings.playerESPEnabled then
+            for _, p in pairs(Players:GetPlayers()) do
+                addPlayerESP(p)
+            end
+            table.insert(espConnections, Players.PlayerAdded:Connect(addPlayerESP))
+        else
+            removePlayerESP()
+        end
+    end)
+
+    local generatorHighlights = {}
+    local palletHighlights = {}
+    local hookHighlights = {}
+    local windowHighlights = {}
+
+    local function deepScan(objectName)
+        local objects = {}
+        local scanned = {}
+
+        local function scanDescendants(parent)
+            for _, obj in pairs(parent:GetDescendants()) do
+                if not scanned[obj] then
+                    scanned[obj] = true
+                    if obj.Name == objectName then
+                        if obj:IsA("Model") or obj:IsA("BasePart") or obj:IsA("MeshPart") then
+                            table.insert(objects, obj)
+                        end
+                    end
+                end
+            end
+        end
+
+        scanDescendants(workspace)
+        return objects
+    end
+
+    local function findGenerators()
+        return deepScan("Generator")
+    end
+
+    local function findWindows()
+        return deepScan("Window")
+    end
+
+    local function findPallets()
+        return deepScan("Palletwrong")
+    end
+
+    local function findHooks()
+        return deepScan("Hook")
+    end
+
+    local function findFinishLine()
+        return deepScan("Fininshline")
+    end
+
+    local function addObjectESP(objects, highlightTable, color)
+        for _, obj in pairs(objects) do
+            if not highlightTable[obj] then
+                pcall(function()
+                    local highlight = Instance.new("Highlight")
+                    highlight.Name = "ObjectESP"
+                    highlight.Adornee = obj
+                    highlight.FillColor = color
+                    highlight.OutlineColor = color
+                    highlight.FillTransparency = 0.6
+                    highlight.OutlineTransparency = 0
+                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                    highlight.Parent = obj
+                    highlightTable[obj] = highlight
+                end)
+            end
+        end
+    end
+
+    local function removeObjectESP(highlightTable)
+        for obj, highlight in pairs(highlightTable) do
+            pcall(function() highlight:Destroy() end)
+        end
+        for k in pairs(highlightTable) do
+            highlightTable[k] = nil
+        end
+    end
+
+    local function refreshObjectESP(findFunc, highlightTable, color, enabled)
+        if enabled then
+            removeObjectESP(highlightTable)
+            local objects = findFunc()
+            addObjectESP(objects, highlightTable, color)
+        end
+    end
+
+    createToggle(espTab, "Generator ESP", function(value)
+        settings.generatorESPEnabled = value
+        if value then
+            local generators = findGenerators()
+            addObjectESP(generators, generatorHighlights, Color3.fromRGB(255, 165, 0))
+        else
+            removeObjectESP(generatorHighlights)
+        end
+    end)
+
+    createToggle(espTab, "Pallet ESP", function(value)
+        settings.palletESPEnabled = value
+        if value then
+            local pallets = findPallets()
+            addObjectESP(pallets, palletHighlights, Color3.fromRGB(255, 0, 0))
+        else
+            removeObjectESP(palletHighlights)
+        end
+    end)
+
+    createToggle(espTab, "Hook ESP", function(value)
+        settings.hookESPEnabled = value
+        if value then
+            local hooks = findHooks()
+            addObjectESP(hooks, hookHighlights, Color3.fromRGB(150, 150, 150))
+        else
+            removeObjectESP(hookHighlights)
+        end
+    end)
+
+    createToggle(espTab, "Window ESP", function(value)
+        settings.windowESPEnabled = value
+        if value then
+            local windows = findWindows()
+            addObjectESP(windows, windowHighlights, Color3.fromRGB(0, 150, 255))
+        else
+            removeObjectESP(windowHighlights)
+        end
+    end)
+
+    createButton(espTab, "Refresh All ESP", function()
+        refreshPlayerESP()
+        refreshObjectESP(findGenerators, generatorHighlights, Color3.fromRGB(255, 165, 0), settings.generatorESPEnabled)
+        refreshObjectESP(findPallets, palletHighlights, Color3.fromRGB(255, 0, 0), settings.palletESPEnabled)
+        refreshObjectESP(findHooks, hookHighlights, Color3.fromRGB(150, 150, 150), settings.hookESPEnabled)
+        refreshObjectESP(findWindows, windowHighlights, Color3.fromRGB(0, 150, 255), settings.windowESPEnabled)
+    end)
+
+    -- TELEPORT TAB CONTENT
+    local function isGeneratorComplete(generator)
+        local progressValue = generator:FindFirstChild("Progress")
+        if progressValue and progressValue:IsA("NumberValue") then
+            return progressValue.Value >= 100
+        end
+
+        local genGui = generator:FindFirstChildOfClass("BillboardGui")
+        if genGui then
+            local textLabel = genGui:FindFirstChildOfClass("TextLabel")
+            if textLabel and textLabel.Text:match("100%%") then
+                return true
+            end
+        end
+
+        return false
+    end
+
+    local function findGeneratorPoint(generator)
+        for i = 1, 4 do
+            local point = generator:FindFirstChild("GeneratorPoint" .. i)
+            if point then
+                return point
+            end
+        end
+        return nil
+    end
+
+    createButton(teleportTab, "TP to Generator", function()
+        local generators = findGenerators()
+        local incompleteGens = {}
+
+        for _, gen in pairs(generators) do
+            if not isGeneratorComplete(gen) then
+                table.insert(incompleteGens, gen)
+            end
+        end
+
+        if #incompleteGens > 0 then
+            local randomGen = incompleteGens[math.random(1, #incompleteGens)]
+            local char = getChar()
+            local root = char:FindFirstChild("HumanoidRootPart")
+
+            if root then
+                local targetPoint = findGeneratorPoint(randomGen)
+                local targetPos
+
+                if targetPoint then
+                    targetPos = targetPoint:IsA("BasePart") and targetPoint.Position or targetPoint:GetPivot().Position
+                else
+                    targetPos = randomGen:IsA("Model") and randomGen:GetPivot().Position or randomGen.Position
+                end
+
+                root.CFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0))
+            end
+        end
+    end)
+
+    createButton(teleportTab, "TP to Finish Line", function()
+        local finishLines = findFinishLine()
+        if #finishLines > 0 then
+            local finishLine = finishLines[1]
+            local char = getChar()
+            local root = char:FindFirstChild("HumanoidRootPart")
+
+            if root then
+                local targetPos = finishLine:IsA("Model") and finishLine:GetPivot().Position or finishLine.Position
+                root.CFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0))
+            end
+        end
+    end)
+
+    -- AUTO TAB CONTENT
+    local currentRepairingGen = nil
+    local autoRepairRunning = false
+
+    local function autoRepairGenerator()
+        autoRepairRunning = true
+        while settings.autoRepairEnabled and autoRepairRunning do
+            pcall(function()
+                local generators = findGenerators()
+                local incompleteGens = {}
+
+                for _, gen in pairs(generators) do
+                    if not isGeneratorComplete(gen) then
+                        table.insert(incompleteGens, gen)
+                    end
+                end
+
+                if #incompleteGens > 0 and not currentRepairingGen then
+                    local targetGen = incompleteGens[1]
+                    currentRepairingGen = targetGen
+
+                    local char = getChar()
+                    local root = char:FindFirstChild("HumanoidRootPart")
+
+                    if root then
+                        local targetPoint = findGeneratorPoint(targetGen)
+                        local targetPos
+
+                        if targetPoint then
+                            targetPos = targetPoint:IsA("BasePart") and targetPoint.Position or targetPoint:GetPivot().Position
+                        else
+                            targetPos = targetGen:IsA("Model") and targetGen:GetPivot().Position or targetGen.Position
+                        end
+
+                        root.CFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0))
+                        root.AssemblyLinearVelocity = Vector3.zero
+                        root.AssemblyAngularVelocity = Vector3.zero
+                        task.wait(0.5)
+
+                        local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                        if remotes then
+                            local genFolder = remotes:FindFirstChild("Generator")
+                            if genFolder then
+                                local repairEvent = genFolder:FindFirstChild("RepairEvent")
+                                if repairEvent then
+                                    repairEvent:FireServer(targetGen, true)
+                                    task.wait(0.2)
+
+                                    local startTime = tick()
+                                    while settings.autoRepairEnabled and not isGeneratorComplete(targetGen) and (tick() - startTime) < 40 do
+                                        if not settings.autoRepairEnabled then break end
+                                        repairEvent:FireServer(targetGen, true)
+                                        task.wait(1)
+                                    end
+
+                                    if isGeneratorComplete(targetGen) then
+                                        currentRepairingGen = nil
+                                        task.wait(1)
+                                    else
+                                        repairEvent:FireServer(targetGen, false)
+                                        currentRepairingGen = nil
+                                        task.wait(0.5)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                else
+                    if currentRepairingGen and isGeneratorComplete(currentRepairingGen) then
+                        currentRepairingGen = nil
+                    end
+                    task.wait(1)
+                end
+            end)
+            task.wait(0.3)
+        end
+        currentRepairingGen = nil
+        autoRepairRunning = false
+    end
+
+    createToggle(autoTab, "Auto Repair Gen", function(value)
+        settings.autoRepairEnabled = value
+        if value then
+            task.spawn(autoRepairGenerator)
+        else
+            autoRepairRunning = false
+            currentRepairingGen = nil
+        end
+    end)
+
+    -- IMPROVED ANTI FAIL - Bypass SkillCheck
+    local skillCheckConnection
+    local bypassingSkillCheck = false
+
+    createToggle(autoTab, "Anti Fail", function(value)
+        settings.antiFail = value
+
+        if value then
+            local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+            if remotes then
+                local genFolder = remotes:FindFirstChild("Generator")
+                if genFolder then
+                    local skillCheckEvent = genFolder:FindFirstChild("SkillCheckEvent")
+                    if skillCheckEvent then
+                        if skillCheckConnection then
+                            skillCheckConnection:Disconnect()
+                            skillCheckConnection = nil
+                        end
+
+                        skillCheckConnection = skillCheckEvent.OnClientEvent:Connect(function(...)
+                            if not bypassingSkillCheck then
+                                bypassingSkillCheck = true
+                                task.spawn(function()
+                                    pcall(function()
+                                        local randomDelay = math.random(25, 60) / 1000
+                                        task.wait(randomDelay)
+
+                                        local resultEvent = genFolder:FindFirstChild("SkillCheckResultEvent")
+                                        if resultEvent then
+                                            resultEvent:FireServer(true)
+                                        end
+
+                                        task.wait(0.05)
+
+                                        local gui = plr.PlayerGui:FindFirstChild("SkillCheck")
+                                        if gui and gui:IsA("ScreenGui") then
+                                            gui.Enabled = false
+                                            task.wait(0.1)
+                                            if gui.Parent then
+                                                gui:Destroy()
+                                            end
+                                        end
+                                    end)
+                                    bypassingSkillCheck = false
+                                end)
+                            end
+                        end)
+                    end
+                end
+            end
+        else
+            if skillCheckConnection then
+                skillCheckConnection:Disconnect()
+                skillCheckConnection = nil
+            end
+            bypassingSkillCheck = false
+        end
+    end)
+
+    local function instantWin()
+        local finishLines = findFinishLine()
+
+        if #finishLines > 0 then
+            local finishLine = finishLines[1]
+            local char = getChar()
+            local root = char:FindFirstChild("HumanoidRootPart")
+
+            if root then
+                local targetPos = finishLine:IsA("Model") and finishLine:GetPivot().Position or finishLine.Position
+                root.CFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0))
+            end
+        end
+    end
+
+    createButton(autoTab, "Instant Win", instantWin)
+
+    -- Set default tab to ESP
+    if tabs["ESP"] then
+        tabs["ESP"].button.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        tabs["ESP"].button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        tabs["ESP"].content.Visible = true
+        currentTab = "ESP"
+    end
+
+    -- Draggable functionality
+    local dragging = false
+    local dragInput
+    local dragStart
+    local startPos
+
+    titleBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = mainFrame.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    titleBar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            mainFrame.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    print("Violence District Script Loaded Successfully!")
+end

@@ -320,8 +320,8 @@ inputStroke.Parent = inputBox
 
 local submitButton = Instance.new("TextButton")
 submitButton.Name = "SubmitButton"
-submitButton.Size = UDim2.new(0.45, -10, 0, 45)
-submitButton.Position = UDim2.new(0.05, 0, 0, 190)
+submitButton.Size = UDim2.new(1, -60, 0, 45)
+submitButton.Position = UDim2.new(0, 30, 0, 180)
 submitButton.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
 submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 submitButton.Text = "SUBMIT"
@@ -334,10 +334,27 @@ local submitCorner = Instance.new("UICorner")
 submitCorner.CornerRadius = UDim.new(0, 12)
 submitCorner.Parent = submitButton
 
+-- TOMBOL GET KEY
+local getKeyButton = Instance.new("TextButton")
+getKeyButton.Name = "GetKeyButton"
+getKeyButton.Size = UDim2.new(1, -60, 0, 45)
+getKeyButton.Position = UDim2.new(0, 30, 0, 235)
+getKeyButton.BackgroundColor3 = Color3.fromRGB(100, 50, 200)
+getKeyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+getKeyButton.Text = "📋 GET KEY"
+getKeyButton.TextSize = 16
+getKeyButton.Font = Enum.Font.GothamBold
+getKeyButton.BorderSizePixel = 0
+getKeyButton.Parent = keyFrame
+
+local getKeyCorner = Instance.new("UICorner")
+getKeyCorner.CornerRadius = UDim.new(0, 12)
+getKeyCorner.Parent = getKeyButton
+
 local cancelButton = Instance.new("TextButton")
 cancelButton.Name = "CancelButton"
-cancelButton.Size = UDim2.new(0.45, -10, 0, 45)
-cancelButton.Position = UDim2.new(0.5, 5, 0, 190)
+cancelButton.Size = UDim2.new(1, -60, 0, 45)
+cancelButton.Position = UDim2.new(0, 30, 0, 290)
 cancelButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 cancelButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 cancelButton.Text = "EXIT"
@@ -353,7 +370,7 @@ cancelCorner.Parent = cancelButton
 local statusLabel = Instance.new("TextLabel")
 statusLabel.Name = "StatusLabel"
 statusLabel.Size = UDim2.new(1, -40, 0, 25)
-statusLabel.Position = UDim2.new(0, 20, 0, 245)
+statusLabel.Position = UDim2.new(0, 20, 0, 345)
 statusLabel.BackgroundTransparency = 1
 statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
 statusLabel.Text = ""
@@ -362,6 +379,10 @@ statusLabel.Font = Enum.Font.GothamMedium
 statusLabel.TextXAlignment = Enum.TextXAlignment.Center
 statusLabel.Parent = keyFrame
 
+-- Perbesar frame
+keyFrame.Size = UDim2.new(0, 400, 0, 380)
+
+-- Hover effects
 submitButton.MouseEnter:Connect(function()
     TweenService:Create(submitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 255, 150)}):Play()
 end)
@@ -370,12 +391,29 @@ submitButton.MouseLeave:Connect(function()
     TweenService:Create(submitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 200, 100)}):Play()
 end)
 
+getKeyButton.MouseEnter:Connect(function()
+    TweenService:Create(getKeyButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(130, 70, 230)}):Play()
+end)
+
+getKeyButton.MouseLeave:Connect(function()
+    TweenService:Create(getKeyButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(100, 50, 200)}):Play()
+end)
+
 cancelButton.MouseEnter:Connect(function()
     TweenService:Create(cancelButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 70, 70)}):Play()
 end)
 
 cancelButton.MouseLeave:Connect(function()
     TweenService:Create(cancelButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(200, 50, 50)}):Play()
+end)
+
+-- Button functions
+getKeyButton.MouseButton1Click:Connect(function()
+    setclipboard("https://discord.gg/qCGFe3a")
+    statusLabel.Text = "✅ Discord link copied!"
+    statusLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
+    task.wait(2)
+    statusLabel.Text = ""
 end)
 
 submitButton.MouseButton1Click:Connect(function()
@@ -906,58 +944,76 @@ function loadMainScript()
     local walkSpeedConnection
 
     createToggle(mainTab, "Walk Speed", function(value)
-        settings.walkSpeedEnabled = value
+    settings.walkSpeedEnabled = value
 
-        if value then
-            if walkSpeedConnection then
-                walkSpeedConnection:Disconnect()
-            end
+    if value then
+        if walkSpeedConnection then
+            walkSpeedConnection:Disconnect()
+        end
 
-            walkSpeedConnection = RunService.Heartbeat:Connect(function()
-                if settings.walkSpeedEnabled then
-                    pcall(function()
-                        local char = plr.Character
-                        if char then
-                            local hum = char:FindFirstChild("Humanoid")
-                            if hum then
-                                hum.WalkSpeed = settings.walkSpeedValue
-                            end
-                            
-                            local root = char:FindFirstChild("HumanoidRootPart")
-                            if root and root:FindFirstChild("TeleportForce") then
-                                for _, force in pairs(root:GetChildren()) do
-                                    if force:IsA("BodyVelocity") or force:IsA("BodyPosition") or force.Name == "TeleportForce" then
-                                        force:Destroy()
-                                    end
+        walkSpeedConnection = RunService.Heartbeat:Connect(function()
+            if settings.walkSpeedEnabled then
+                pcall(function()
+                    local char = plr.Character
+                    if char then
+                        local hum = char:FindFirstChild("Humanoid")
+                        if hum then
+                            hum.WalkSpeed = settings.walkSpeedValue
+                        end
+                        
+                        -- PERBAIKAN: Hapus semua force yang membatasi movement
+                        local root = char:FindFirstChild("HumanoidRootPart")
+                        if root then
+                            -- Hapus BodyVelocity, BodyPosition, dll
+                            for _, child in pairs(root:GetChildren()) do
+                                if child:IsA("BodyVelocity") or 
+                                   child:IsA("BodyPosition") or 
+                                   child:IsA("BodyGyro") or
+                                   child:IsA("BodyThrust") or
+                                   child:IsA("BodyAngularVelocity") or
+                                   child:IsA("BodyForce") or
+                                   child:IsA("RocketPropulsion") then
+                                    child:Destroy()
                                 end
                             end
+                            
+                            -- Reset velocity jika terlalu kecil (anti-stuck)
+                            if root.AssemblyLinearVelocity.Magnitude < 0.5 and hum.MoveDirection.Magnitude > 0 then
+                                root.AssemblyLinearVelocity = hum.MoveDirection * settings.walkSpeedValue
+                            end
                         end
-                    end)
-                end
-            end)
-            
-            plr.CharacterAdded:Connect(function(char)
-                if settings.walkSpeedEnabled then
-                    char:WaitForChild("Humanoid").WalkSpeed = settings.walkSpeedValue
-                end
-            end)
-        else
-            if walkSpeedConnection then
-                walkSpeedConnection:Disconnect()
-                walkSpeedConnection = nil
-            end
-
-            pcall(function()
-                local char = plr.Character
-                if char then
-                    local hum = char:FindFirstChild("Humanoid")
-                    if hum then
-                        hum.WalkSpeed = 16
                     end
+                end)
+            end
+        end)
+        
+        -- Handle character respawn
+        plr.CharacterAdded:Connect(function(char)
+            if settings.walkSpeedEnabled then
+                task.wait(0.5)
+                local hum = char:WaitForChild("Humanoid", 5)
+                if hum then
+                    hum.WalkSpeed = settings.walkSpeedValue
                 end
-            end)
+            end
+        end)
+    else
+        if walkSpeedConnection then
+            walkSpeedConnection:Disconnect()
+            walkSpeedConnection = nil
         end
-    end)
+
+        pcall(function()
+            local char = plr.Character
+            if char then
+                local hum = char:FindFirstChild("Humanoid")
+                if hum then
+                    hum.WalkSpeed = 16
+                end
+            end
+        end)
+    end
+end)
 
     createSlider(mainTab, "Speed Value", 16, 500, 16, function(value)
         settings.walkSpeedValue = value

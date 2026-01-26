@@ -570,24 +570,6 @@ function loadMainScript()
         TweenService:Create(closeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(200, 50, 50)}):Play()
     end)
 
-    minimizeButton.MouseButton1Click:Connect(function()
-        isMinimized = not isMinimized
-        
-        if isMinimized then
-            -- MINIMIZE: Hide containers and shrink
-            tabContainer.Visible = false
-            contentContainer.Visible = false
-            mainFrame.Size = minimizedSize
-            minimizeButton.Text = "□"
-        else
-            -- MAXIMIZE: Restore size and show containers
-            mainFrame.Size = originalSize
-            tabContainer.Visible = true
-            contentContainer.Visible = true
-            minimizeButton.Text = "—"
-        end
-    end)
-
     closeButton.MouseButton1Click:Connect(function()
         mainGui:Destroy()
     end)
@@ -644,7 +626,8 @@ function loadMainScript()
         windowESPEnabled = false,
         tpToolEnabled = false,
         autoRepairEnabled = false,
-        antiFail = false
+        antiFail = false,
+        autoParry = false
     }
 
     local function getChar()
@@ -655,6 +638,34 @@ function loadMainScript()
     local tabs = {}
 
     -- Create Tab Function
+
+    local currentTab = nil
+    local tabs = {}
+
+   minimizeButton.MouseButton1Click:Connect(function()
+        isMinimized = not isMinimized
+        
+        if isMinimized then
+            tabContainer.Visible = false
+            contentContainer.Visible = false
+            mainFrame.Size = minimizedSize
+            minimizeButton.Text = "+"
+            titleText.TextXAlignment = Enum.TextXAlignment.Left
+            titleText.Size = UDim2.new(1, -100, 1, 0)
+            titleText.Position = UDim2.new(0, 10, 0, 0)
+        else
+            mainFrame.Size = originalSize
+            tabContainer.Visible = true
+            contentContainer.Visible = true
+            minimizeButton.Text = "—"
+            titleText.TextXAlignment = Enum.TextXAlignment.Left
+            titleText.Size = UDim2.new(1, -100, 1, 0)
+            titleText.Position = UDim2.new(0, 20, 0, 0)
+        end
+    end)
+
+    -- Create Tab Function
+
     local function createTab(name)
         local tabButton = Instance.new("TextButton")
         tabButton.Name = name .. "Tab"
@@ -911,8 +922,23 @@ function loadMainScript()
                             if hum then
                                 hum.WalkSpeed = settings.walkSpeedValue
                             end
+                            
+                            local root = char:FindFirstChild("HumanoidRootPart")
+                            if root and root:FindFirstChild("TeleportForce") then
+                                for _, force in pairs(root:GetChildren()) do
+                                    if force:IsA("BodyVelocity") or force:IsA("BodyPosition") or force.Name == "TeleportForce" then
+                                        force:Destroy()
+                                    end
+                                end
+                            end
                         end
                     end)
+                end
+            end)
+            
+            plr.CharacterAdded:Connect(function(char)
+                if settings.walkSpeedEnabled then
+                    char:WaitForChild("Humanoid").WalkSpeed = settings.walkSpeedValue
                 end
             end)
         else
@@ -1360,19 +1386,106 @@ function loadMainScript()
         end
     end)
 
-    createButton(teleportTab, "TP to Finish Line", function()
-        local finishLines = findFinishLine()
-        if #finishLines > 0 then
-            local finishLine = finishLines[1]
-            local char = getChar()
-            local root = char:FindFirstChild("HumanoidRootPart")
+    -- TELEPORT TO PLAYER WITH LIST
+    local playerListFrame = Instance.new("Frame")
+    playerListFrame.Name = "PlayerList"
+    playerListFrame.Size = UDim2.new(1, -10, 0, 200 * scaleFactor)
+    playerListFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    playerListFrame.BorderSizePixel = 0
+    playerListFrame.Parent = teleportTab
 
-            if root then
-                local targetPos = finishLine:IsA("Model") and finishLine:GetPivot().Position or finishLine.Position
-                root.CFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0))
+    local playerListCorner = Instance.new("UICorner")
+    playerListCorner.CornerRadius = UDim.new(0, 8)
+    playerListCorner.Parent = playerListFrame
+
+    local playerListTitle = Instance.new("TextLabel")
+    playerListTitle.Size = UDim2.new(1, -20, 0, 30 * scaleFactor)
+    playerListTitle.Position = UDim2.new(0, 10, 0, 5)
+    playerListTitle.BackgroundTransparency = 1
+    playerListTitle.Text = "Teleport to Player"
+    playerListTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    playerListTitle.TextSize = 14 * scaleFactor
+    playerListTitle.Font = Enum.Font.GothamBold
+    playerListTitle.TextXAlignment = Enum.TextXAlignment.Left
+    playerListTitle.Parent = playerListFrame
+
+    local playerScrollFrame = Instance.new("ScrollingFrame")
+    playerScrollFrame.Size = UDim2.new(1, -20, 1, -40 * scaleFactor)
+    playerScrollFrame.Position = UDim2.new(0, 10, 0, 35 * scaleFactor)
+    playerScrollFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    playerScrollFrame.BorderSizePixel = 0
+    playerScrollFrame.ScrollBarThickness = 4
+    playerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    playerScrollFrame.Parent = playerListFrame
+
+    local scrollCorner = Instance.new("UICorner")
+    scrollCorner.CornerRadius = UDim.new(0, 6)
+    scrollCorner.Parent = playerScrollFrame
+
+    local playerListLayout = Instance.new("UIListLayout")
+    playerListLayout.Padding = UDim.new(0, 5)
+    playerListLayout.Parent = playerScrollFrame
+
+    playerListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        playerScrollFrame.CanvasSize = UDim2.new(0, 0, 0, playerListLayout.AbsoluteContentSize.Y + 5)
+    end)
+
+    local function refreshPlayerList()
+        for _, child in pairs(playerScrollFrame:GetChildren()) do
+            if child:IsA("TextButton") then
+                child:Destroy()
             end
         end
-    end)
+
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= plr then
+                local playerButton = Instance.new("TextButton")
+                playerButton.Name = player.Name
+                playerButton.Size = UDim2.new(1, -10, 0, 35 * scaleFactor)
+                playerButton.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+                playerButton.BorderSizePixel = 0
+                playerButton.Text = player.Name
+                playerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+                playerButton.TextSize = 13 * scaleFactor
+                playerButton.Font = Enum.Font.Gotham
+                playerButton.Parent = playerScrollFrame
+
+                local btnCorner = Instance.new("UICorner")
+                btnCorner.CornerRadius = UDim.new(0, 6)
+                btnCorner.Parent = playerButton
+
+                playerButton.MouseEnter:Connect(function()
+                    TweenService:Create(playerButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 200, 100)}):Play()
+                end)
+
+                playerButton.MouseLeave:Connect(function()
+                    TweenService:Create(playerButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(25, 25, 30)}):Play()
+                end)
+
+                playerButton.MouseButton1Click:Connect(function()
+                    pcall(function()
+                        if player.Character then
+                            local targetRoot = player.Character:FindFirstChild("HumanoidRootPart")
+                            if targetRoot then
+                                local char = getChar()
+                                local root = char:FindFirstChild("HumanoidRootPart")
+                                if root then
+                                    root.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 3)
+                                end
+                            end
+                        end
+                    end)
+                end)
+            end
+        end
+    end
+
+    refreshPlayerList()
+
+    Players.PlayerAdded:Connect(refreshPlayerList)
+    Players.PlayerRemoving:Connect(refreshPlayerList)
+
+    createButton(teleportTab, "Refresh Player List", refreshPlayerList)
 
     -- AUTO TAB CONTENT
     local currentRepairingGen = nil
@@ -1381,7 +1494,7 @@ function loadMainScript()
     local function autoRepairGenerator()
         autoRepairRunning = true
         while settings.autoRepairEnabled and autoRepairRunning do
-            pcall(function()
+            local success = pcall(function()
                 local generators = findGenerators()
                 local incompleteGens = {}
 
@@ -1391,7 +1504,7 @@ function loadMainScript()
                     end
                 end
 
-                if #incompleteGens > 0 and not currentRepairingGen then
+                if #incompleteGens > 0 then
                     local targetGen = incompleteGens[1]
                     currentRepairingGen = targetGen
 
@@ -1408,47 +1521,74 @@ function loadMainScript()
                             targetPos = targetGen:IsA("Model") and targetGen:GetPivot().Position or targetGen.Position
                         end
 
-                        root.CFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0))
-                        root.AssemblyLinearVelocity = Vector3.zero
-                        root.AssemblyAngularVelocity = Vector3.zero
-                        task.wait(0.5)
+                        root.CFrame = CFrame.new(targetPos)
+                        task.wait(0.2)
 
                         local remotes = ReplicatedStorage:FindFirstChild("Remotes")
                         if remotes then
                             local genFolder = remotes:FindFirstChild("Generator")
                             if genFolder then
                                 local repairEvent = genFolder:FindFirstChild("RepairEvent")
+                                local repairAnim = genFolder:FindFirstChild("RepairAnim")
+                                
                                 if repairEvent then
                                     repairEvent:FireServer(targetGen, true)
-                                    task.wait(0.2)
-
+                                    
+                                    if repairAnim then
+                                        repairAnim:FireServer()
+                                    end
+                                    
+                                    task.wait(0.3)
+                                    
                                     local startTime = tick()
-                                    while settings.autoRepairEnabled and not isGeneratorComplete(targetGen) and (tick() - startTime) < 40 do
+                                    local lastProgress = 0
+                                    
+                                    while settings.autoRepairEnabled and not isGeneratorComplete(targetGen) and (tick() - startTime) < 80 do
                                         if not settings.autoRepairEnabled then break end
+                                        
+                                        local char2 = getChar()
+                                        local root2 = char2:FindFirstChild("HumanoidRootPart")
+                                        if root2 then
+                                            root2.CFrame = CFrame.new(targetPos)
+                                            root2.AssemblyLinearVelocity = Vector3.zero
+                                            root2.AssemblyAngularVelocity = Vector3.zero
+                                        end
+                                        
                                         repairEvent:FireServer(targetGen, true)
-                                        task.wait(1)
+                                        
+                                        local currentProgress = 0
+                                        local progressVal = targetGen:FindFirstChild("Progress")
+                                        if progressVal and progressVal:IsA("NumberValue") then
+                                            currentProgress = progressVal.Value
+                                        end
+                                        
+                                        if currentProgress == lastProgress and currentProgress < 100 then
+                                            repairEvent:FireServer(targetGen, false)
+                                            task.wait(0.1)
+                                            repairEvent:FireServer(targetGen, true)
+                                        end
+                                        
+                                        lastProgress = currentProgress
+                                        task.wait(0.3)
                                     end
 
-                                    if isGeneratorComplete(targetGen) then
-                                        currentRepairingGen = nil
-                                        task.wait(1)
-                                    else
-                                        repairEvent:FireServer(targetGen, false)
-                                        currentRepairingGen = nil
-                                        task.wait(0.5)
-                                    end
+                                    repairEvent:FireServer(targetGen, false)
+                                    currentRepairingGen = nil
+                                    task.wait(1)
                                 end
                             end
                         end
                     end
                 else
-                    if currentRepairingGen and isGeneratorComplete(currentRepairingGen) then
-                        currentRepairingGen = nil
-                    end
-                    task.wait(1)
+                    currentRepairingGen = nil
+                    task.wait(3)
                 end
             end)
-            task.wait(0.3)
+            
+            if not success then
+                currentRepairingGen = nil
+                task.wait(2)
+            end
         end
         currentRepairingGen = nil
         autoRepairRunning = false
@@ -1460,66 +1600,145 @@ function loadMainScript()
             task.spawn(autoRepairGenerator)
         else
             autoRepairRunning = false
+            
+            pcall(function()
+                local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                if remotes then
+                    local genFolder = remotes:FindFirstChild("Generator")
+                    if genFolder then
+                        local repairEvent = genFolder:FindFirstChild("RepairEvent")
+                        if repairEvent and currentRepairingGen then
+                            repairEvent:FireServer(currentRepairingGen, false)
+                        end
+                    end
+                end
+            end)
+            
             currentRepairingGen = nil
         end
     end)
 
-    -- IMPROVED ANTI FAIL - Bypass SkillCheck
+    -- AUTO PARRY
+    local autoParryConnection
+    local parryDebounce = false
+
+    createToggle(autoTab, "Auto Parry", function(value)
+        settings.autoParry = value
+        
+        if value then
+            if autoParryConnection then
+                autoParryConnection:Disconnect()
+            end
+            
+            autoParryConnection = RunService.Heartbeat:Connect(function()
+                if settings.autoParry and not parryDebounce then
+                    pcall(function()
+                        local char = getChar()
+                        local root = char:FindFirstChild("HumanoidRootPart")
+                        
+                        if root then
+                            for _, killer in pairs(Players:GetPlayers()) do
+                                if killer.Team and killer.Team.Name == "Killer" and killer.Character then
+                                    local killerRoot = killer.Character:FindFirstChild("HumanoidRootPart")
+                                    local killerHum = killer.Character:FindFirstChild("Humanoid")
+                                    
+                                    if killerRoot and killerHum then
+                                        local distance = (root.Position - killerRoot.Position).Magnitude
+                                        
+                                        if distance < 15 then
+                                            for _, anim in pairs(killerHum:GetPlayingAnimationTracks()) do
+                                                if anim.Name:lower():match("attack") or anim.Name:lower():match("swing") or anim.Name:lower():match("hit") then
+                                                    if not parryDebounce then
+                                                        parryDebounce = true
+                                                        
+                                                        local backpack = plr:FindFirstChild("Backpack")
+                                                        local parryTool = char:FindFirstChild("Parrying Dagger") or (backpack and backpack:FindFirstChild("Parrying Dagger"))
+                                                        
+                                                        if parryTool then
+                                                            if parryTool.Parent == backpack then
+                                                                char.Humanoid:EquipTool(parryTool)
+                                                                task.wait(0.05)
+                                                            end
+                                                            
+                                                            local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                                                            if remotes then
+                                                                local itemsFolder = remotes:FindFirstChild("Items")
+                                                                if itemsFolder then
+                                                                    local parryFolder = itemsFolder:FindFirstChild("Parrying Dagger")
+                                                                    if parryFolder then
+                                                                        local parryRemote = parryFolder:FindFirstChild("parry")
+                                                                        if parryRemote then
+                                                                            parryRemote:FireServer()
+                                                                        end
+                                                                    end
+                                                                end
+                                                            end
+                                                        end
+                                                        
+                                                        task.wait(1.5)
+                                                        parryDebounce = false
+                                                    end
+                                                    break
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end)
+                end
+            end)
+        else
+            if autoParryConnection then
+                autoParryConnection:Disconnect()
+                autoParryConnection = nil
+            end
+            parryDebounce = false
+        end
+    end)
+
+   -- ANTI FAIL - Bypass SkillCheck
     local skillCheckConnection
-    local bypassingSkillCheck = false
+    local skillCheckGuiConnection
 
     createToggle(autoTab, "Anti Fail", function(value)
         settings.antiFail = value
-
+        
         if value then
-            local remotes = ReplicatedStorage:FindFirstChild("Remotes")
-            if remotes then
-                local genFolder = remotes:FindFirstChild("Generator")
-                if genFolder then
-                    local skillCheckEvent = genFolder:FindFirstChild("SkillCheckEvent")
-                    if skillCheckEvent then
-                        if skillCheckConnection then
-                            skillCheckConnection:Disconnect()
-                            skillCheckConnection = nil
-                        end
-
-                        skillCheckConnection = skillCheckEvent.OnClientEvent:Connect(function(...)
-                            if not bypassingSkillCheck then
-                                bypassingSkillCheck = true
-                                task.spawn(function()
-                                    pcall(function()
-                                        local randomDelay = math.random(25, 60) / 1000
-                                        task.wait(randomDelay)
-
-                                        local resultEvent = genFolder:FindFirstChild("SkillCheckResultEvent")
-                                        if resultEvent then
-                                            resultEvent:FireServer(true)
-                                        end
-
-                                        task.wait(0.05)
-
-                                        local gui = plr.PlayerGui:FindFirstChild("SkillCheck")
-                                        if gui and gui:IsA("ScreenGui") then
-                                            gui.Enabled = false
-                                            task.wait(0.1)
-                                            if gui.Parent then
-                                                gui:Destroy()
-                                            end
-                                        end
-                                    end)
-                                    bypassingSkillCheck = false
-                                end)
+            skillCheckGuiConnection = plr.PlayerGui.ChildAdded:Connect(function(gui)
+                if gui.Name == "SkillCheckPromptGui" and settings.antiFail then
+                    task.spawn(function()
+                        task.wait(0.01)
+                        pcall(function()
+                            local genFolder = ReplicatedStorage:FindFirstChild("Remotes")
+                            if genFolder then
+                                genFolder = genFolder:FindFirstChild("Generator")
+                                if genFolder then
+                                    local resultEvent = genFolder:FindFirstChild("SkillCheckResultEvent")
+                                    if resultEvent then
+                                        resultEvent:FireServer(true)
+                                    end
+                                end
                             end
+                            gui:Destroy()
                         end)
-                    end
+                    end)
                 end
-            end
+            end)
         else
-            if skillCheckConnection then
-                skillCheckConnection:Disconnect()
+            if skillCheckGuiConnection then 
+                pcall(function()
+                    skillCheckGuiConnection:Disconnect()
+                end)
+                skillCheckGuiConnection = nil
+            end
+            if skillCheckConnection then 
+                pcall(function()
+                    skillCheckConnection:Disconnect()
+                end)
                 skillCheckConnection = nil
             end
-            bypassingSkillCheck = false
         end
     end)
 
@@ -1554,25 +1773,30 @@ function loadMainScript()
     local dragStart
     local startPos
 
-    titleBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = mainFrame.Position
-            
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
+    local function makeDraggable(frame)
+        frame.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                dragStart = input.Position
+                startPos = mainFrame.Position
+                
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                    end
+                end)
+            end
+        end)
 
-    titleBar.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
+        frame.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                dragInput = input
+            end
+        end)
+    end
+
+    makeDraggable(titleBar)
+    makeDraggable(mainFrame)
 
     UserInputService.InputChanged:Connect(function(input)
         if input == dragInput and dragging then

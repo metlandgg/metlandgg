@@ -1,116 +1,2134 @@
-                                                                                 local REQUIRED_KEY=   
-                                                                        "23GG";local Players=game:GetService("Players") 
-                                                                    ;local plr=Players.LocalPlayer;local RunService=game:         
-                                                                GetService("RunService");local TweenService=game:GetService(            
-                                                            "TweenService");local UserInputService=game:GetService("UserInputService");   
-                                                          local VirtualInputManager=game:GetService("VirtualInputManager");local            
-                                                        ReplicatedStorage=game:GetService("ReplicatedStorage");local Lighting=game:GetService 
-                                                      ("Lighting");local Rayfield=loadstring(game:HttpGet("https://sirius.menu/rayfield"))();   
-                                                    local KeyWindow=Rayfield:CreateWindow({Name="METLANDGG SCRIPT",LoadingTitle=                  
-                                                  "Violence District",LoadingSubtitle="by metlandgg",ConfigurationSaving={Enabled=false},KeySystem= 
-                                                  true,KeySettings={Title="METLANDGG SCRIPT",Subtitle="Violence District",Note=                       
-                                                "Get key at discord.gg/qCGFe3a",FileName="MetlandKey",SaveKey=true,GrabKeyFromSite=false,Key={          
-                                                REQUIRED_KEY}}});local function getChar() return plr.Character or plr.CharacterAdded:Wait() ;end local    
-                                              function deepScan(name) local result={};local scanned={};for _,obj in pairs(workspace:GetDescendants()) do if 
-                                                not scanned[obj] then scanned[obj]=true;if ((obj.Name==name) and (obj:IsA("Model") or obj:IsA("BasePart")   
-                                            or obj:IsA("MeshPart"))) then table.insert(result,obj);end end end return result;end local _cacheGens,_cacheWins, 
-                                            _cachePals,_cacheHooks,_cacheFL={},{},{},{},{};local _lastCacheTime=0;local CACHE_TTL=6;local function refreshCache 
-                                          () local now=tick();if ((now-_lastCacheTime)<CACHE_TTL) then return;end _lastCacheTime=now;_cacheGens={};_cacheWins={}; 
-                                          _cachePals={};_cacheHooks={};_cacheFL={};local map=workspace:FindFirstChild("Map");local scanRoot=map or workspace ;for _ 
-                                          ,obj in pairs(scanRoot:GetDescendants()) do local n=obj.Name;if ((n=="Generator") and obj:IsA("Model")) then table.insert(  
-                                          _cacheGens,obj);elseif ((n=="Window") and (obj:IsA("Model") or obj:IsA("BasePart"))) then table.insert(_cacheWins,obj);     
-                                        elseif ((n=="Palletwrong") and (obj:IsA("Model") or obj:IsA("BasePart"))) then table.insert(_cachePals,obj);elseif ((n=="Hook") 
-                                         and (obj:IsA("Model") or obj:IsA("BasePart"))) then table.insert(    --[[==============================]]_cacheHooks,obj);elseif 
-                                         ((n=="Fininshline") and (obj:IsA("Model") or obj:IsA(      --[[============================================]]"BasePart"))) then  
-                                        table.insert(_cacheFL,obj);end end end local function   --[[======================================================]]findGenerators( 
-                                      ) refreshCache();return _cacheGens;end local function --[[==========================================================]] findWindows()    
-                                      refreshCache();return _cacheWins;end local function --[[==============================================================]] findPallets()  
-                                      refreshCache();return _cachePals;end local function --[[================================================================]] findHooks()    
-                                      refreshCache();return _cacheHooks;end local         --[[==================================================================]]function      
-                                      findFinishLine() refreshCache();if ( #_cacheFL>0)   --[[==================================================================]]then return       
-                                    _cacheFL;end local map=workspace:FindFirstChild("Map" --[[====================================================================]]);if  not map 
-                     then return {};end local result={};for _,obj in pairs(map:           --[[====================================================================]]GetDescendants( 
-              )) do if (obj.Name=="Fininshline") then table.insert(result,obj);end end    --[[======================================================================]]_cacheFL=     
-            result;return result;end local function isGenComplete(gen) local progress=gen --[[======================================================================]]:GetAttribute 
-          ("RepairProgress");if progress then return progress>=100 ;end local pv=gen:     --[[======================================================================]]              
-        FindFirstChild("Progress");if (pv and pv:IsA("NumberValue")) then return pv.Value --[[======================================================================]]>=100 ;end    
-        return false;end local function getGenProgress(gen) return gen:GetAttribute(      --[[======================================================================]]              
-      "RepairProgress") or 0 ;end local function isGenPaused(gen) return gen:GetAttribute --[[======================================================================]](             
-      "ProgressPaused")==true ;end local function findBestGenPoint(gen) local char=plr.     --[[==================================================================]]Character;local 
-       root=char and char:FindFirstChild("HumanoidRootPart") ;local bestPoint=nil;for _,    --[[================================================================]]child in pairs(   
-    gen:GetChildren()) do if (child.Name:match("GeneratorPoint") and child:IsA("BasePart")) --[[==============================================================]] then local       
-    isRepairing=child:GetAttribute("IsRepairing");if  not isRepairing then if  not bestPoint  --[[==========================================================]]then bestPoint=     
-    child;elseif root then local dNew=(child.Position-root.Position).Magnitude;local dCur=(     --[[====================================================]]bestPoint.Position-root 
-    .Position).Magnitude;if (dNew<dCur) then bestPoint=child;end end end end end if  not          --[[==============================================]]bestPoint then for _,     
-    child in pairs(gen:GetChildren()) do if (child.Name:match("GeneratorPoint") and child:IsA(        --[[====================================]]"BasePart")) then return      
-    child;end end end return bestPoint;end local function findBestGen() local gens=findGenerators();local --[[========================]] best=nil;local bestProgress= -1;for  
-    _,gen in pairs(gens) do local progress=getGenProgress(gen);if (progress>=100) then continue;end if isGenPaused(gen) then continue;end if (progress>bestProgress) then   
-  bestProgress=progress;best=gen;end end return best;end local function findGenPoint(gen) return findBestGenPoint(gen);end local function isKillerTeam(p) return p and p. 
-  Team and (p.Team.Name=="Killer") ;end local function isHooked(char) if  not char then return false;end local hookedProgress=char:GetAttribute("HookedProgress");if (  
-  hookedProgress and (hookedProgress>=100)) then return true;end local hookCount=char:GetAttribute("HookCount");if (hookCount and (hookCount>0)) then local hum=char:     
-  FindFirstChild("Humanoid");if (hum and (hum.PlatformStand or hum.Sit)) then return true;end end for _,v in pairs(char:GetDescendants()) do if (v:IsA("Weld") and (v.    
-  Name=="Hurtbox")) then if (v.Part0 and (v.Part0.Name=="HRP_Clone")) then return true;end end end return false;end local espHL={};local espConns={};local genHL={};local 
-   palHL={};local hookHL={};local winHL={};local function addObjectESP(objects,tbl,color) for _,obj in pairs(objects) do if  not tbl[obj] then pcall(function() local h=  
-  Instance.new("Highlight");h.Adornee=obj;h.FillColor=color;h.OutlineColor=color;h.FillTransparency=0.75;h.OutlineTransparency=0.15;h.DepthMode=Enum.HighlightDepthMode.  
-  AlwaysOnTop;h.Parent=obj;tbl[obj]=h;end);end end end local function removeObjectESP(tbl) for _,h in pairs(tbl) do pcall(function() h:Destroy();end);end for k in pairs( 
-  tbl) do tbl[k]=nil;end end local function addPlayerESP(player) if (player==plr) then return;end local function makeESP(char) task.wait(0.5);if espHL[player] then pcall 
-  (function() espHL[player]:Destroy();end);end local isK=isKillerTeam(player);local h=Instance.new("Highlight");h.Adornee=char;h.FillColor=(isK and Color3.fromRGB(255,60 
-  ,60)) or Color3.fromRGB(60,255,120) ;h.OutlineColor=h.FillColor;h.FillTransparency=0.72;h.OutlineTransparency=0.1;h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop;h.    
-  Parent=char;espHL[player]=h;local hrp=char:FindFirstChild("HumanoidRootPart");if hrp then local bb=Instance.new("BillboardGui");bb.Adornee=hrp;bb.Size=UDim2.new(0,180,0, 
-  55);bb.StudsOffset=Vector3.new(0,3,0);bb.AlwaysOnTop=true;bb.Parent=hrp;local nl=Instance.new("TextLabel",bb);nl.Size=UDim2.new(1,0,0.5,0);nl.BackgroundTransparency=1;nl 
-  .Text=player.Name;nl.TextColor3=Color3.fromRGB(255,255,255);nl.TextSize=14;nl.Font=Enum.Font.GothamBold;nl.TextStrokeTransparency=0.2;local dl=Instance.new("TextLabel",  
-  bb);dl.Size=UDim2.new(1,0,0.5,0);dl.Position=UDim2.new(0,0,0.5,0);dl.BackgroundTransparency=1;dl.Text="0m";dl.TextColor3=(isK and Color3.fromRGB(255,150,150)) or Color3. 
-  fromRGB(150,255,180) ;dl.TextSize=12;dl.Font=Enum.Font.Gotham;dl.TextStrokeTransparency=0.2;task.spawn(function() while bb.Parent and hrp.Parent  do local mc=getChar();  
-  local mr=mc:FindFirstChild("HumanoidRootPart");if mr then dl.Text=string.format("%.0fm",(hrp.Position-mr.Position).Magnitude);end task.wait(0.5);end end);end task.spawn( 
-  function() while char.Parent and h.Parent  do local newK=isKillerTeam(player);if (newK~=isK) then isK=newK;h.FillColor=(isK and Color3.fromRGB(255,60,60)) or Color3.     
-  fromRGB(60,255,120) ;h.OutlineColor=h.FillColor;end task.wait(3);end end);end if player.Character then makeESP(player.Character);end local c=player.CharacterAdded:       
-  Connect(makeESP);table.insert(espConns,c);end local function removePlayerESP() for _,h in pairs(espHL) do pcall(function() h:Destroy();end);end for _,c in pairs(espConns 
-  ) do c:Disconnect();end espHL={};espConns={};end local s={walkSpeed=16,walkSpeedOn=false,noclip=false,playerESP=false,genESP=false,palESP=false,hookESP=false,winESP=     
-  false,autoRepair=false,autoPerfect=false,autoParry=false,autoVault=false,autoPallet=false,autoSelfUnhook=false,autoTof=false,antiCamp=false,autoAttack=false,autoLunge=   
-  false,killerInstinct=false,fullbright=false,autoAim=false,autoHeal=false,slowSurvivors=false,autoCarry=false,antiTrack=false,fakeLag=false};local conns={};local          
-  SurvivorTab=KeyWindow:CreateTab("Survivor","shield");local KillerTab=KeyWindow:CreateTab("Killer","sword");local ESPTab=KeyWindow:CreateTab("ESP","eye");local TPTab=     
-  KeyWindow:CreateTab("Teleport","zap");local MiscTab=KeyWindow:CreateTab("Misc","settings");SurvivorTab:CreateSection("Automation");SurvivorTab:CreateToggle({Name=      
-  "Auto Repair Generator",CurrentValue=false,Flag="AutoRepair",Callback=function(v) s.autoRepair=v;if conns.repair then conns.repair:Disconnect();conns.repair=nil;end if 
-    not v then pcall(function() local cam=workspace.CurrentCamera;if cam then local sc=cam.ViewportSize/2 ;VirtualInputManager:SendMouseButtonEvent(sc.X,sc.Y,0,false,    
-    game,0);end local remotes=ReplicatedStorage:FindFirstChild("Remotes");local re=remotes and remotes:FindFirstChild("Generator") and remotes.Generator:FindFirstChild(  
-    "RepairEvent") ;if (re and conns.repairingGen) then re:FireServer(conns.repairingGen,false);end conns.repairingGen=nil;local char=getChar();local hum=char:           
-    FindFirstChild("Humanoid");if hum then hum.WalkSpeed=s.walkSpeed;end end);return;end local cd=0;conns.repair=RunService.Heartbeat:Connect(function() if  not s.       
-    autoRepair then return;end if ((tick() -cd)<0.3) then return;end pcall(function() local remotes=ReplicatedStorage:FindFirstChild("Remotes");local char=plr.Character; 
-      if  not char then return;end if isHooked(char) then return;end local root=char:FindFirstChild("HumanoidRootPart");if  not root then return;end for _,p in pairs(  
-      Players:GetPlayers()) do if (p==plr) then continue;end if ( not p.Team or (p.Team.Name~="Killer")) then continue;end if  not p.Character then continue;end local  
-      kr=p.Character:FindFirstChild("HumanoidRootPart");if (kr and ((root.Position-kr.Position).Magnitude<20)) then local cam=workspace.CurrentCamera;if cam then local 
-         sc=cam.ViewportSize/2 ;VirtualInputManager:SendMouseButtonEvent(sc.X,sc.Y,0,false,game,0);end local re=remotes and remotes:FindFirstChild("Generator") and     
-        remotes.Generator:FindFirstChild("RepairEvent") ;if (re and conns.repairingGen) then re:FireServer(conns.repairingGen,false);end conns.repairingGen=nil;cd=tick 
-        ();return;end end local tg=findBestGen();if  not tg then local cam=workspace.CurrentCamera;if cam then local sc=cam.ViewportSize/2 ;VirtualInputManager:        
-          SendMouseButtonEvent(sc.X,sc.Y,0,false,game,0);end local hum=char:FindFirstChild("Humanoid");if hum then hum.WalkSpeed=s.walkSpeed;end return;end conns.    
-            repairingGen=tg;local hum=char:FindFirstChild("Humanoid");local tp=findBestGenPoint(tg);local pos;if tp then pos=tp.Position;else pos=tg:GetPivot().      
-              Position;pos=Vector3.new(pos.X,pos.Y + 3 ,pos.Z);end if ((root.Position-pos).Magnitude>5) then root.CFrame=CFrame.new(pos);cd=tick();task.wait(0.25);   
-                return;end local gc=(tg:IsA("Model") and tg:GetPivot().Position) or tg.Position ;root.CFrame=CFrame.new(pos,Vector3.new(gc.X,pos.Y,gc.Z));if hum then 
-                   hum.WalkSpeed=0;end local cam=workspace.CurrentCamera;if cam then local sc=cam.ViewportSize/2 ;VirtualInputManager:SendMouseButtonEvent(sc.X,sc. 
-                      Y,0,true,game,0);end local re=remotes and remotes:FindFirstChild("Generator") and remotes.Generator:FindFirstChild("RepairEvent") ;if re then 
-                                   re:FireServer(tg,true);end local ucl=remotes and remotes:FindFirstChild("Game") and remotes.Game:FindFirstChild(                 
-                                      "UpdateCharacterLook") ;if ucl then local char2=plr.Character;if char2 then local neck=char2:FindFirstChild("Torso") and      
-                                      char2.Torso:FindFirstChild("Neck") ;local rj=char2:                   FindFirstChild("HumanoidRootPart") and char2.           
-                                      HumanoidRootPart:FindFirstChild("RootJoint") ;local rh=char2:         FindFirstChild("Torso") and char2.Torso:              
-                                      FindFirstChild("Right Hip") ;local lh=char2:FindFirstChild(           "Torso") and char2.Torso:FindFirstChild("Left Hip") ; 
-                                      if (neck and rj and rh and lh) then pcall(function() ucl:             FireServer(neck.C0,rj.C0,rh.C0,lh.C0);end);end end    
-                                      end cd=tick();end);end);end});SurvivorTab:CreateToggle({Name=           "Auto Perfect SkillCheck",CurrentValue=false,Flag=  
-                                      "AutoPerfect",Callback=function(v) s.autoPerfect=v;if conns.            sc then conns.sc:Disconnect();conns.sc=nil;end if   
-                                      not v then return;end local remotes=ReplicatedStorage:                  FindFirstChild("Remotes");if  not remotes then    
-                                        return;end local genRes=remotes:FindFirstChild("Generator")            and remotes.Generator:FindFirstChild(            
-                                        "SkillCheckResultEvent") ;local healRes=remotes:                        FindFirstChild("Healing") and remotes.Healing:  
-                                        FindFirstChild("SkillCheckResultEvent") ;local genSC=                   remotes:FindFirstChild("Generator") and       
-                                        remotes.Generator:FindFirstChild("SkillCheckEvent") ;                   local healSC=remotes:FindFirstChild("Healing" 
-                                        ) and remotes.Healing:FindFirstChild("SkillCheckEvent") ;                 local hasFired=false;local lastCheck=0;   
-                                        local c1=RunService.RenderStepped:Connect(function() if                   not s.autoPerfect then return;end pcall(  
-                                          function() local PlayerGui=plr.PlayerGui;local gui=                       PlayerGui:FindFirstChild(             
-                                          "SkillCheckPromptGui") or PlayerGui:FindFirstChild(                         "SkillCheckPromptGui-con") ;if  
-                                            ( not gui or  not gui.Enabled) then hasFired=false;                         return;end local check=   
-                                            gui:FindFirstChild("Check");if ( not check or                                     not check.  
-                                              Visible) then hasFired=false;return;end local 
-                                                 goal=check:FindFirstChild("Goal");local  
-                                                    line=check:FindFirstChild("Line");  
-                                                          if ( not goal or  not   
+local REQUIRED_KEY = "23GG"
 
+local Players = game:GetService("Players")
+local plr = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Lighting = game:GetService("Lighting")
 
-line) then hasFired=false;return;end if hasFired then return;end local goalRot=goal.Rotation%360 ;local lineRot=line.Rotation%360 ;if (goalRot<0) then goalRot+=360 end if (lineRot<0) then lineRot+=360 end local goalAbs=goal.AbsoluteSize.X;local halfGoal;if (goalAbs>0) then halfGoal=goalAbs * 0.12 ;else local checkSize=((check.AbsoluteSize.X>0) and check.AbsoluteSize.X) or 300 ;halfGoal=checkSize * goal.Size.X.Scale * 0.12 ;end halfGoal=math.max(halfGoal,18);local diff=lineRot-goalRot ;if (diff>180) then diff-=360 end if (diff< -180) then diff+=360 end local absDiff=math.abs(diff);local lastLineRot=check:GetAttribute("_lastLineRot");local lastTick=check:GetAttribute("_lastTick");local lineSpeed=0;local now=tick();if (lastLineRot and lastTick) then local dtRot=lineRot-lastLineRot ;if (dtRot>180) then dtRot-=360 end if (dtRot< -180) then dtRot+=360 end local dtTime=now-lastTick ;if (dtTime>0) then lineSpeed=dtRot/dtTime ;end end pcall(function() check:SetAttribute("_lastLineRot",lineRot);check:SetAttribute("_lastTick",now);end);local frameLatency=((math.abs(lineSpeed)>100) and 0.03) or 0.05 ;local predictedDiff=diff-(lineSpeed * frameLatency) ;if (predictedDiff>180) then predictedDiff-=360 end if (predictedDiff< -180) then predictedDiff+=360 end local absPredicted=math.abs(predictedDiff);if (absPredicted<=halfGoal) then hasFired=true;task.spawn(function() VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.Space,false,game);task.wait(0.05);VirtualInputManager:SendKeyEvent(false,Enum.KeyCode.Space,false,game);task.wait(0.8);hasFired=false;end);end end);end);local c2,c3;if (genSC and genRes) then c2=genSC.OnClientEvent:Connect(function() if  not s.autoPerfect then return;end task.wait(0.08);pcall(function() genRes:FireServer(true);end);end);end if (healSC and healRes) then c3=healSC.OnClientEvent:Connect(function() if  not s.autoPerfect then return;end task.wait(0.08);pcall(function() healRes:FireServer(true);end);end);end conns.sc={Disconnect=function() c1:Disconnect();if c2 then c2:Disconnect();end if c3 then c3:Disconnect();end end};end});SurvivorTab:CreateToggle({Name="Auto Parry",CurrentValue=false,Flag="AutoParry",Callback=function(v) s.autoParry=v;if conns.parry then conns.parry:Disconnect();conns.parry=nil;end if  not v then return;end local db=false;local lastKP={};conns.parry=RunService.Heartbeat:Connect(function() if ( not s.autoParry or db) then return;end pcall(function() local char=getChar();local root=char:FindFirstChild("HumanoidRootPart");if  not root then return;end local bp=plr:FindFirstChild("Backpack");local pt=char:FindFirstChild("Parrying Dagger") or (bp and bp:FindFirstChild("Parrying Dagger")) ;if  not pt then return;end for _,killer in pairs(Players:GetPlayers()) do if (killer==plr) then continue;end if ( not killer.Team or (killer.Team.Name~="Killer")) then continue;end if  not killer.Character then continue;end local kr=killer.Character:FindFirstChild("HumanoidRootPart");local kh=killer.Character:FindFirstChild("Humanoid");if ( not kr or  not kh) then continue;end if ((root.Position-kr.Position).Magnitude>12) then continue;end local cur=kr.Position;local last=lastKP[killer.UserId];lastKP[killer.UserId]=cur;local lunging=false;if last then local vel=(cur-last).Magnitude;if (vel>0.8) then if ((root.Position-cur).Unit:Dot((cur-last).Unit)>0.7) then lunging=true;end end end local swinging=false;for _,track in pairs(kh:GetPlayingAnimationTracks()) do if  not track.Animation then continue;end if ((track.WeightCurrent>0.15) and tostring(track.Priority):match("Action3")) then swinging=true;break;end end if (lunging or swinging) then db=true;if (pt.Parent~=char) then char.Humanoid:EquipTool(pt);task.wait(0.05);end local remotes=ReplicatedStorage:FindFirstChild("Remotes");local pr=remotes and remotes:FindFirstChild("Items") and remotes.Items:FindFirstChild("Parrying Dagger") and remotes.Items["Parrying Dagger"]:FindFirstChild("parry") ;if pr then pr:FireServer();end task.wait(1.5);db=false;return;end end end);end);end});SurvivorTab:CreateToggle({Name="Auto Vault",CurrentValue=false,Flag="AutoVault",Callback=function(v) s.autoVault=v;if conns.vault then conns.vault:Disconnect();conns.vault=nil;end if  not v then return;end local cd=0;conns.vault=RunService.Heartbeat:Connect(function() if  not s.autoVault then return;end if ((tick() -cd)<2) then return;end pcall(function() local char=getChar();local root=char:FindFirstChild("HumanoidRootPart");if  not root then return;end local killerNear=false;for _,p in pairs(Players:GetPlayers()) do if (p==plr) then continue;end if  not isKillerTeam(p) then continue;end if  not p.Character then continue;end local kr=p.Character:FindFirstChild("HumanoidRootPart");if (kr and ((root.Position-kr.Position).Magnitude<25)) then killerNear=true;break;end end if  not killerNear then return;end local wins=findWindows();local nearest,nd=nil,15;for _,w in pairs(wins) do local wp=(w:IsA("Model") and w:GetPivot().Position) or w.Position ;local d=(root.Position-wp).Magnitude;if (d<nd) then nd=d;nearest=w;end end if nearest then local remotes=ReplicatedStorage:FindFirstChild("Remotes");local ve=remotes and remotes:FindFirstChild("Window") and remotes.Window:FindFirstChild("VaultEvent") ;if ve then ve:FireServer(nearest);cd=tick();end end end);end);end});SurvivorTab:CreateToggle({Name="Auto Drop Pallet",CurrentValue=false,Flag="AutoPallet",Callback=function(v) s.autoPallet=v;if conns.pallet then conns.pallet:Disconnect();conns.pallet=nil;end if  not v then return;end local cd=0;conns.pallet=RunService.Heartbeat:Connect(function() if  not s.autoPallet then return;end if ((tick() -cd)<2) then return;end pcall(function() local char=getChar();local root=char:FindFirstChild("HumanoidRootPart");if  not root then return;end for _,p in pairs(Players:GetPlayers()) do if (p==plr) then continue;end if  not isKillerTeam(p) then continue;end if  not p.Character then continue;end local kr=p.Character:FindFirstChild("HumanoidRootPart");if  not kr then continue;end if ((root.Position-kr.Position).Magnitude>8) then continue;end local pals=findPallets();local nearest,nd=nil,12;for _,pal in pairs(pals) do local pp=(pal:IsA("Model") and pal:GetPivot().Position) or pal.Position ;local d=(root.Position-pp).Magnitude;if (d<nd) then nd=d;nearest=pal;end end if nearest then local remotes=ReplicatedStorage:FindFirstChild("Remotes");local de=remotes and remotes:FindFirstChild("Pallet") and remotes.Pallet:FindFirstChild("PalletDropEvent") ;if de then de:FireServer(nearest);cd=tick();end end end end);end);end});SurvivorTab:CreateToggle({Name="Auto Self Unhook",CurrentValue=false,Flag="AutoUnhook",Callback=function(v) s.autoSelfUnhook=v;if conns.unhook then conns.unhook:Disconnect();conns.unhook=nil;end if  not v then return;end local cd=0;conns.unhook=RunService.Heartbeat:Connect(function() if  not s.autoSelfUnhook then return;end if ((tick() -cd)<3) then return;end pcall(function() local char=getChar();if  not isHooked(char) then return;end local hookCount=char:GetAttribute("HookCount") or 0 ;local hookedProgress=char:GetAttribute("HookedProgress") or 0 ;if (hookCount>=2) then return;end if (hookedProgress>=66) then return;end local nearbyRescuer=false;local root=char:FindFirstChild("HumanoidRootPart");if root then for _,p in pairs(Players:GetPlayers()) do if (p==plr) then continue;end if isKillerTeam(p) then continue;end if  not p.Character then continue;end local pr=p.Character:FindFirstChild("HumanoidRootPart");if (pr and ((root.Position-pr.Position).Magnitude<8)) then nearbyRescuer=true;break;end end end if nearbyRescuer then return;end local remotes=ReplicatedStorage:FindFirstChild("Remotes");local sue=remotes and remotes:FindFirstChild("Carry") and remotes.Carry:FindFirstChild("SelfUnHookEvent") ;if sue then sue:FireServer();cd=tick();end end);end);end});SurvivorTab:CreateToggle({Name="Auto Twist of Fate",CurrentValue=false,Flag="AutoTof",Callback=function(v) s.autoTof=v;if conns.tof then conns.tof:Disconnect();conns.tof=nil;end if  not v then return;end local cd=0;conns.tof=RunService.Heartbeat:Connect(function() if  not s.autoTof then return;end if ((tick() -cd)<1.5) then return;end pcall(function() local char=getChar();local root=char:FindFirstChild("HumanoidRootPart");if  not root then return;end if isKillerTeam(plr) then return;end local remotes=ReplicatedStorage:FindFirstChild("Remotes");if  not remotes then return;end local tofFolder=remotes:FindFirstChild("Items") and remotes.Items:FindFirstChild("Twist of Fate") ;if  not tofFolder then return;end local fireRemote=tofFolder:FindFirstChild("Fire");local vizRemote=tofFolder:FindFirstChild("VisualizeBullet");if  not fireRemote then return;end local nk,nd=nil,80;for _,p in pairs(Players:GetPlayers()) do if (p==plr) then continue;end if  not isKillerTeam(p) then continue;end if  not p.Character then continue;end local kr=p.Character:FindFirstChild("HumanoidRootPart");if  not kr then continue;end local d=(root.Position-kr.Position).Magnitude;if (d<nd) then nd=d;nk=p;end end if  not nk then return;end local kr=nk.Character:FindFirstChild("HumanoidRootPart");if  not kr then return;end local targetPos=kr.Position;local direction=(targetPos-root.Position).Unit;fireRemote:FireServer(targetPos);if vizRemote then vizRemote:FireServer(root.Position,direction,80,"Default");end cd=tick();end);end);end});SurvivorTab:CreateToggle({Name="Anti Camp (Hooked)",CurrentValue=false,Flag="AntiCamp",Callback=function(v) s.antiCamp=v;if conns.anticamp then conns.anticamp:Disconnect();conns.anticamp=nil;end if  not v then return;end local wasHooked=false;local executed=false;local hookPosition=nil;local ghostConn=nil;local hookPhaseConn=nil;local remotes=ReplicatedStorage:FindFirstChild("Remotes");local hookPhaseRemote=remotes and remotes:FindFirstChild("Carry") and remotes.Carry:FindFirstChild("HookPhase") ;if hookPhaseRemote then hookPhaseConn=hookPhaseRemote.OnClientEvent:Connect(function(phase) if  not s.antiCamp then return;end local char=getChar();if  not char then return;end local root=char:FindFirstChild("HumanoidRootPart");if  not root then return;end if ((phase==1) or (phase=="1") or (phase=="camping") or (phase==true)) then if  not executed then executed=true;hookPosition=root.CFrame;task.spawn(function() task.wait(0.5);local nk,nd=nil,math.huge;for _,p in pairs(Players:GetPlayers()) do if (p==plr) then continue;end if  not isKillerTeam(p) then continue;end if  not p.Character then continue;end local kr=p.Character:FindFirstChild("HumanoidRootPart");if  not kr then continue;end local d=(root.Position-kr.Position).Magnitude;if (d<nd) then nd=d;nk=p;end end if (nk and nk.Character) then local kr=nk.Character:FindFirstChild("HumanoidRootPart");if kr then local behindPos=kr.Position + (kr.CFrame.LookVector *  -2) + Vector3.new(0,0,0) ;root.CFrame=CFrame.new(behindPos);if hookPosition then ghostConn=RunService.RenderStepped:Connect(function() if ( not s.antiCamp or  not hookPosition) then if ghostConn then ghostConn:Disconnect();end return;end pcall(function() workspace.CurrentCamera.CFrame=CFrame.new(hookPosition.Position + Vector3.new(0,5,10) ,hookPosition.Position);end);end);task.delay(8,function() if ghostConn then ghostConn:Disconnect();ghostConn=nil;end end);end end end end);end end end);end conns.anticamp=RunService.Heartbeat:Connect(function() if  not s.antiCamp then return;end pcall(function() local char=getChar();if  not char then return;end local root=char:FindFirstChild("HumanoidRootPart");if  not root then return;end local hooked=isHooked(char);if  not hooked then wasHooked=false;executed=false;if ghostConn then ghostConn:Disconnect();ghostConn=nil;end hookPosition=nil;return;end if  not wasHooked then wasHooked=true;hookPosition=root.CFrame;end if (wasHooked and  not executed and  not hookPhaseRemote) then executed=true;task.spawn(function() task.wait(1);local nk,nd=nil,math.huge;for _,p in pairs(Players:GetPlayers()) do if (p==plr) then continue;end if  not isKillerTeam(p) then continue;end if  not p.Character then continue;end local kr=p.Character:FindFirstChild("HumanoidRootPart");if  not kr then continue;end local d=(root.Position-kr.Position).Magnitude;if (d<nd) then nd=d;nk=p;end end if (nk and nk.Character) then local kr=nk.Character:FindFirstChild("HumanoidRootPart");if kr then local behindPos=kr.Position + (kr.CFrame.LookVector *  -2) ;root.CFrame=CFrame.new(behindPos);if hookPosition then ghostConn=RunService.RenderStepped:Connect(function() if ( not s.antiCamp or  not hookPosition) then if ghostConn then ghostConn:Disconnect();end return;end pcall(function() workspace.CurrentCamera.CFrame=CFrame.new(hookPosition.Position + Vector3.new(0,5,10) ,hookPosition.Position);end);end);task.delay(8,function() if ghostConn then ghostConn:Disconnect();ghostConn=nil;end end);end end end end);end end);end);conns.anticampHook=hookPhaseConn;end});SurvivorTab:CreateSection("Actions");local aimActive=false;local aimKeybind=Enum.KeyCode.Q;SurvivorTab:CreateToggle({Name="Auto Aim (Hold Q / Keybind)",CurrentValue=false,Flag="AutoAim",Callback=function(v) s.autoAim=v;if conns.autoAim then conns.autoAim:Disconnect();conns.autoAim=nil;end if conns.aimKey then conns.aimKey:Disconnect();conns.aimKey=nil;end if  not v then aimActive=false;return;end conns.aimKey=UserInputService.InputBegan:Connect(function(input,gpe) if gpe then return;end if (input.KeyCode==aimKeybind) then aimActive=true;end if (input.UserInputType==Enum.UserInputType.MouseButton2) then aimActive=true;end end);local aimKeyEnd=UserInputService.InputEnded:Connect(function(input) if (input.KeyCode==aimKeybind) then aimActive=false;end if (input.UserInputType==Enum.UserInputType.MouseButton2) then aimActive=false;end end);conns.autoAim=RunService.RenderStepped:Connect(function() if ( not s.autoAim or  not aimActive) then pcall(function() local char=plr.Character;if char then char:SetAttribute("Aiming",false);char:SetAttribute("overridelookscript",false);end end);return;end pcall(function() if isKillerTeam(plr) then return;end local char=getChar();local root=char:FindFirstChild("HumanoidRootPart");if  not root then return;end char:SetAttribute("Aiming",true);local nk,nd=nil,math.huge;for _,p in pairs(Players:GetPlayers()) do if (p==plr) then continue;end if  not isKillerTeam(p) then continue;end if  not p.Character then continue;end local kr=p.Character:FindFirstChild("HumanoidRootPart");if  not kr then continue;end local d=(root.Position-kr.Position).Magnitude;if (d<nd) then nd=d;nk=p;end end if ( not nk or  not nk.Character) then return;end local kr=nk.Character:FindFirstChild("HumanoidRootPart");if  not kr then return;end local cam=workspace.CurrentCamera;local torso=nk.Character:FindFirstChild("UpperTorso") or nk.Character:FindFirstChild("Torso") or kr ;local targetPos=torso.Position + Vector3.new(0,0.3,0) ;local direction=(targetPos-cam.CFrame.Position).Unit;local newCF=CFrame.new(cam.CFrame.Position,cam.CFrame.Position + direction );cam.CFrame=cam.CFrame:Lerp(newCF,0.35);end);end);conns.aimKeyEnd=aimKeyEnd;end});SurvivorTab:CreateDropdown({Name="Aim Keybind",Options={"Q","E","F","C","V","X","Z","R","T","G","H","LeftAlt","RightAlt","CapsLock"},CurrentOption={"Q"},MultipleOptions=false,Flag="AimKeybind",Callback=function(opt) local key=opt[1] or opt ;aimKeybind=Enum.KeyCode[key] or Enum.KeyCode.Q ;end});SurvivorTab:CreateButton({Name="Revive Target",Callback=function() task.spawn(function() pcall(function() local remotes=ReplicatedStorage:FindFirstChild("Remotes");if  not remotes then return;end local tp=nil;local cam=workspace.CurrentCamera;if (cam.CameraSubject and cam.CameraSubject:IsA("Humanoid")) then tp=Players:GetPlayerFromCharacter(cam.CameraSubject.Parent);if (tp==plr) then tp=nil;end end if  not tp then for _,p in pairs(Players:GetPlayers()) do if ((p~=plr) and p.Character) then local h=p.Character:FindFirstChild("Humanoid");if (h and ((h.Health<h.MaxHealth) or h.PlatformStand)) then tp=p;break;end end end end if ( not tp or  not tp.Character) then return;end local char=getChar();local root=char:FindFirstChild("HumanoidRootPart");local tRoot=tp.Character:FindFirstChild("HumanoidRootPart");if (root and tRoot) then root.CFrame=tRoot.CFrame * CFrame.new(0,0,2.5) ;task.wait(0.15);end local carry=remotes:FindFirstChild("Carry");if carry then local ue=carry:FindFirstChild("UnHookEvent");if ue then for i=1,5 do ue:FireServer(tp);task.wait(0.05);end end end task.wait(0.1);local healing=remotes:FindFirstChild("Healing");if healing then local he=healing:FindFirstChild("HealEvent");if he then for i=1,15 do he:FireServer(tp,true);task.wait(0.05);end end end task.wait(0.1);local h=tp.Character:FindFirstChild("Humanoid");if h then h.Health=h.MaxHealth;end end);end);end});SurvivorTab:CreateButton({Name="Instant Escape (Finish Line)",Callback=function() pcall(function() local char=getChar();local root=char:FindFirstChild("HumanoidRootPart");if  not root then return;end local fl=findFinishLine();if ( #fl>0) then local pos=(fl[1]:IsA("Model") and fl[1]:GetPivot().Position) or fl[1].Position ;root.CFrame=CFrame.new(pos + Vector3.new(0,3,0) );task.wait(0.1);local remotes=ReplicatedStorage:FindFirstChild("Remotes");local et=remotes and remotes:FindFirstChild("Generator") and remotes.Generator:FindFirstChild("Escapetime") ;if et then et:FireServer();end local lever=remotes and remotes:FindFirstChild("Exit") and remotes.Exit:FindFirstChild("LeverEvent") ;if lever then lever:FireServer();end end end);end});SurvivorTab:CreateButton({Name="Open Exit Gate",Callback=function() pcall(function() local remotes=ReplicatedStorage:FindFirstChild("Remotes");local ge=remotes and remotes:FindFirstChild("Items") and remotes.Items:FindFirstChild("Gate") and remotes.Items.Gate:FindFirstChild("gate") ;if ge then ge:FireServer();end end);end});SurvivorTab:CreateSection("Healing");SurvivorTab:CreateToggle({Name="Auto Heal Nearby Survivor",CurrentValue=false,Flag="AutoHeal",Callback=function(v) s.autoHeal=v;if conns.heal then conns.heal:Disconnect();conns.heal=nil;end if  not v then return;end local cd=0;conns.heal=RunService.Heartbeat:Connect(function() if  not s.autoHeal then return;end if ((tick() -cd)<0.3) then return;end pcall(function() local char=getChar();if  not char then return;end if isHooked(char) then return;end if isKillerTeam(plr) then return;end local root=char:FindFirstChild("HumanoidRootPart");if  not root then return;end local remotes=ReplicatedStorage:FindFirstChild("Remotes");if  not remotes then return;end local healing=remotes:FindFirstChild("Healing");if  not healing then return;end local he=healing:FindFirstChild("HealEvent");if  not he then return;end local target=nil;local targetDist=5;local myHum=char:FindFirstChild("Humanoid");if (myHum and (myHum.Health<myHum.MaxHealth)) then target=plr;end if  not target then for _,p in pairs(Players:GetPlayers()) do if (p==plr) then continue;end if isKillerTeam(p) then continue;end if  not p.Character then continue;end local ph=p.Character:FindFirstChild("Humanoid");if ( not ph or (ph.Health>=ph.MaxHealth)) then continue;end if isHooked(p.Character) then continue;end local pr=p.Character:FindFirstChild("HumanoidRootPart");if  not pr then continue;end local d=(root.Position-pr.Position).Magnitude;if (d<targetDist) then targetDist=d;target=p;end end end if  not target then return;end he:FireServer(target,true);cd=tick();end);end);end});SurvivorTab:CreateButton({Name="Full Heal Self",Callback=function() pcall(function() local char=getChar();local hum=char:FindFirstChild("Humanoid");if hum then hum.Health=hum.MaxHealth;end local remotes=ReplicatedStorage:FindFirstChild("Remotes");local healing=remotes and remotes:FindFirstChild("Healing") ;local he=healing and healing:FindFirstChild("HealEvent") ;if he then for i=1,20 do he:FireServer(plr,true);task.wait(0.05);end end end);end});KillerTab:CreateSection("Combat");KillerTab:CreateToggle({Name="Smart Auto Attack",CurrentValue=false,Flag="AutoAttack",Callback=function(v) s.autoAttack=v;if conns.attack then conns.attack:Disconnect();conns.attack=nil;end if  not v then return;end local lastAtk=0;local atkCooldown=0;local char=getChar();local hum=char:FindFirstChild("Humanoid");if hum then local atkCdAttr=char:GetAttribute("AttackCooldown");atkCooldown=(atkCdAttr and atkCdAttr) or 1.5 ;end conns.attack=RunService.Heartbeat:Connect(function() if  not s.autoAttack then return;end if ((tick() -lastAtk)<atkCooldown) then return;end pcall(function() if  not isKillerTeam(plr) then return;end local ch=plr.Character;if  not ch then return;end local root=ch:FindFirstChild("HumanoidRootPart");if  not root then return;end local killerHum=ch:FindFirstChild("Humanoid");if killerHum then local newCd=ch:GetAttribute("AttackCooldown");if newCd then atkCooldown=newCd;end if (killerHum.Health<=0) then return;end end local ns,nd=nil,4.5;for _,p in pairs(Players:GetPlayers()) do if (p==plr) then continue;end if isKillerTeam(p) then continue;end if  not p.Character then continue;end local sh=p.Character:FindFirstChild("Humanoid");if ( not sh or (sh.Health<=0)) then continue;end local hookedSurv=p.Character:GetAttribute("HookedProgress");if (hookedSurv and (hookedSurv>=100)) then continue;end local sr=p.Character:FindFirstChild("HumanoidRootPart");if  not sr then continue;end local d=(root.Position-sr.Position).Magnitude;if (d<nd) then nd=d;ns=p;end end if  not ns then return;end local sr=ns.Character:FindFirstChild("HumanoidRootPart");if  not sr then return;end local dirToTarget=(sr.Position-root.Position).Unit;local facingDot=root.CFrame.LookVector:Dot(dirToTarget);if (facingDot<0.5) then return;end lastAtk=tick();local remotes=ReplicatedStorage:FindFirstChild("Remotes");if  not remotes then return;end local ae=remotes:FindFirstChild("AttackEvent");if ae then ae:FireServer();end local attacks=remotes:FindFirstChild("Attacks");if attacks then local ba=attacks:FindFirstChild("BasicAttack");if ba then ba:FireServer();end task.wait(0.08);local hit=attacks:FindFirstChild("hit");if hit then hit:FireServer(ns.Character);end end end);end);end});KillerTab:CreateToggle({Name="Smart Auto Lunge",CurrentValue=false,Flag="AutoLunge",Callback=function(v) s.autoLunge=v;if conns.lunge then conns.lunge:Disconnect();conns.lunge=nil;end if  not v then return;end local lastLunge=0;local lungeCd=4;conns.lunge=RunService.Heartbeat:Connect(function() if  not s.autoLunge then return;end if ((tick() -lastLunge)<lungeCd) then return;end pcall(function() if  not isKillerTeam(plr) then return;end local ch=plr.Character;if  not ch then return;end local root=ch:FindFirstChild("HumanoidRootPart");if  not root then return;end local newCd=ch:GetAttribute("LungeCooldown");if newCd then lungeCd=newCd;end local ns,nd=nil,18;for _,p in pairs(Players:GetPlayers()) do if (p==plr) then continue;end if isKillerTeam(p) then continue;end if  not p.Character then continue;end local sh=p.Character:FindFirstChild("Humanoid");if ( not sh or (sh.Health<=0)) then continue;end local hookedSurv=p.Character:GetAttribute("HookedProgress");if (hookedSurv and (hookedSurv>=100)) then continue;end local sr=p.Character:FindFirstChild("HumanoidRootPart");if  not sr then continue;end local d=(root.Position-sr.Position).Magnitude;if (d<nd) then nd=d;ns=p;end end if  not ns then return;end local sr=ns.Character:FindFirstChild("HumanoidRootPart");if  not sr then return;end local dirToSurv=(sr.Position-root.Position).Unit;local facingDot=root.CFrame.LookVector:Dot(dirToSurv);if (facingDot<0.6) then return;end local remotes=ReplicatedStorage:FindFirstChild("Remotes");local le=remotes and remotes:FindFirstChild("Attacks") and remotes.Attacks:FindFirstChild("Lunge") ;if le then le:FireServer();lastLunge=tick();end end);end);end});KillerTab:CreateSection("Actions");KillerTab:CreateButton({Name="Force Drop Survivor",Callback=function() pcall(function() local remotes=ReplicatedStorage:FindFirstChild("Remotes");local de=remotes and remotes:FindFirstChild("Carry") and remotes.Carry:FindFirstChild("DropSurvivorEvent") ;if de then de:FireServer();end end);end});KillerTab:CreateToggle({Name="Slow All Survivors",CurrentValue=false,Flag="SlowSurvivors",Callback=function(v) s.slowSurvivors=v;if conns.slow then conns.slow:Disconnect();conns.slow=nil;end if  not v then return;end local cd=0;conns.slow=RunService.Heartbeat:Connect(function() if  not s.slowSurvivors then return;end if ((tick() -cd)<2) then return;end pcall(function() if  not isKillerTeam(plr) then return;end local remotes=ReplicatedStorage:FindFirstChild("Remotes");local sl=remotes and remotes:FindFirstChild("Mechanics") and remotes.Mechanics:FindFirstChild("Slowserver") ;if  not sl then return;end for _,p in pairs(Players:GetPlayers()) do if (p==plr) then continue;end if isKillerTeam(p) then continue;end if  not p.Character then continue;end sl:FireServer(p.Character,0.4,3);end cd=tick();end);end);end});KillerTab:CreateToggle({Name="Auto Carry Survivor",CurrentValue=false,Flag="AutoCarry",Callback=function(v) s.autoCarry=v;if conns.carry then conns.carry:Disconnect();conns.carry=nil;end if  not v then return;end local cd=0;conns.carry=RunService.Heartbeat:Connect(function() if  not s.autoCarry then return;end if ((tick() -cd)<2) then return;end pcall(function() if  not isKillerTeam(plr) then return;end local char=getChar();local root=char:FindFirstChild("HumanoidRootPart");if  not root then return;end local remotes=ReplicatedStorage:FindFirstChild("Remotes");local ce=remotes and remotes:FindFirstChild("Carry") and remotes.Carry:FindFirstChild("CarrySurvivorEvent") ;if  not ce then return;end local ns,nd=nil,5;for _,p in pairs(Players:GetPlayers()) do if (p==plr) then continue;end if isKillerTeam(p) then continue;end if  not p.Character then continue;end local ph=p.Character:FindFirstChild("Humanoid");if ( not ph or (ph.Health<=0)) then continue;end local knocked=p.Character:GetAttribute("Knocked");if  not knocked then continue;end local sr=p.Character:FindFirstChild("HumanoidRootPart");if  not sr then continue;end local d=(root.Position-sr.Position).Magnitude;if (d<nd) then nd=d;ns=p;end end if ns then ce:FireServer(ns.Character);cd=tick();end end);end);end});KillerTab:CreateButton({Name="Mori Nearest Survivor",Callback=function() pcall(function() if  not isKillerTeam(plr) then return;end local char=getChar();local root=char:FindFirstChild("HumanoidRootPart");if  not root then return;end local remotes=ReplicatedStorage:FindFirstChild("Remotes");local mori=remotes and remotes:FindFirstChild("Killers") and remotes.Killers:FindFirstChild("Startmori") ;if  not mori then return;end local ns,nd=nil,6;for _,p in pairs(Players:GetPlayers()) do if (p==plr) then continue;end if isKillerTeam(p) then continue;end if  not p.Character then continue;end local sr=p.Character:FindFirstChild("HumanoidRootPart");if  not sr then continue;end local d=(root.Position-sr.Position).Magnitude;if (d<nd) then nd=d;ns=p;end end if ns then mori:FireServer(ns.Character);end end);end});KillerTab:CreateButton({Name="Destroy Nearest Pallet",Callback=function() pcall(function() local remotes=ReplicatedStorage:FindFirstChild("Remotes");local pe=remotes and remotes:FindFirstChild("Pallet") and remotes.Pallet:FindFirstChild("PalletDropEvent") ;if  not pe then return;end local char=getChar();local root=char:FindFirstChild("HumanoidRootPart");if  not root then return;end local pals=findPallets();local nearest,nd=nil,math.huge;for _,pal in pairs(pals) do local pp=(pal:IsA("Model") and pal:GetPivot().Position) or pal.Position ;local d=(root.Position-pp).Magnitude;if (d<nd) then nd=d;nearest=pal;end end if nearest then pe:FireServer(nearest);end end);end});KillerTab:CreateButton({Name="Break Nearest Generator",Callback=function() pcall(function() local remotes=ReplicatedStorage:FindFirstChild("Remotes");local bg=remotes and remotes:FindFirstChild("Generator") and remotes.Generator:FindFirstChild("BreakGenEvent") ;if  not bg then return;end local char=getChar();local root=char:FindFirstChild("HumanoidRootPart");if  not root then return;end local gens=findGenerators();local nearest,nd=nil,math.huge;for _,g in pairs(gens) do local gp=(g:IsA("Model") and g:GetPivot().Position) or g.Position ;local d=(root.Position-gp).Magnitude;if (d<nd) then nd=d;nearest=g;end end if nearest then bg:FireServer(nearest);end end);end});ESPTab:CreateSection("Players");ESPTab:CreateToggle({Name="Player ESP",CurrentValue=false,Flag="PlayerESP",Callback=function(v) s.playerESP=v;if conns.espRefresh then conns.espRefresh:Disconnect();conns.espRefresh=nil;end if v then for _,p in pairs(Players:GetPlayers()) do addPlayerESP(p);end table.insert(espConns,Players.PlayerAdded:Connect(addPlayerESP));local lastESPCheck=0;conns.espRefresh=RunService.Heartbeat:Connect(function() if  not s.playerESP then return;end if ((tick() -lastESPCheck)<2) then return;end lastESPCheck=tick();for player,h in pairs(espHL) do if ( not h or  not h.Parent) then espHL[player]=nil;addPlayerESP(player);end end end);else removePlayerESP();end end});ESPTab:CreateSection("Objects");ESPTab:CreateToggle({Name="Generator ESP",CurrentValue=false,Flag="GenESP",Callback=function(v) s.genESP=v;if conns.genESP then conns.genESP:Disconnect();conns.genESP=nil;end if  not v then removeObjectESP(genHL);for _,bb in pairs(workspace:GetDescendants()) do if (bb:IsA("BillboardGui") and (bb.Name=="GenESP_Progress")) then bb:Destroy();end end return;end local function setupGenESP(gen) if genHL[gen] then return;end pcall(function() local h=Instance.new("Highlight");h.Adornee=gen;h.FillColor=Color3.fromRGB(255,165,0);h.OutlineColor=Color3.fromRGB(255,165,0);h.FillTransparency=0.75;h.OutlineTransparency=0.15;h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop;h.Parent=gen;genHL[gen]=h;local mesh=gen:FindFirstChildOfClass("MeshPart") or gen:FindFirstChildOfClass("BasePart") ;if  not mesh then for _,c in pairs(gen:GetChildren()) do if c:IsA("BasePart") then mesh=c;break;end end end if  not mesh then return;end local existing=mesh:FindFirstChild("GenESP_Progress");if existing then existing:Destroy();end local bb=Instance.new("BillboardGui");bb.Name="GenESP_Progress";bb.Adornee=mesh;bb.Size=UDim2.new(0,120,0,40);bb.StudsOffset=Vector3.new(0,4,0);bb.AlwaysOnTop=true;bb.Parent=mesh;local bg=Instance.new("Frame",bb);bg.Size=UDim2.new(1,0,1,0);bg.BackgroundTransparency=1;bg.BorderSizePixel=0;local barBg=Instance.new("Frame",bg);barBg.Size=UDim2.new(0.9,0,0,8);barBg.Position=UDim2.new(0.05,0,0.6,0);barBg.BackgroundColor3=Color3.fromRGB(40,40,40);barBg.BackgroundTransparency=0.4;barBg.BorderSizePixel=0;Instance.new("UICorner",barBg).CornerRadius=UDim.new(1,0);local barFill=Instance.new("Frame",barBg);barFill.Size=UDim2.new(0,0,1,0);barFill.BackgroundColor3=Color3.fromRGB(255,165,0);barFill.BorderSizePixel=0;Instance.new("UICorner",barFill).CornerRadius=UDim.new(1,0);local label=Instance.new("TextLabel",bg);label.Size=UDim2.new(1,0,0.55,0);label.BackgroundTransparency=1;label.Text="Gen 0%";label.TextColor3=Color3.fromRGB(255,255,255);label.TextSize=13;label.Font=Enum.Font.GothamBold;label.TextStrokeTransparency=0.2;task.spawn(function() while bb.Parent and s.genESP  do pcall(function() local progress=gen:GetAttribute("RepairProgress") or 0 ;local ratio=math.clamp(progress/100 ,0,1);barFill.Size=UDim2.new(ratio,0,1,0);label.Text=string.format("%.0f%%",progress);if (progress>=100) then bb.Enabled=false;h.FillColor=Color3.fromRGB(0,255,100);h.OutlineColor=Color3.fromRGB(0,255,100);h.FillTransparency=0.9;elseif (progress>50) then barFill.BackgroundColor3=Color3.fromRGB(255,200,0);label.TextColor3=Color3.fromRGB(255,200,0);h.FillColor=Color3.fromRGB(255,200,0);h.OutlineColor=Color3.fromRGB(255,200,0);else barFill.BackgroundColor3=Color3.fromRGB(255,100,0);label.TextColor3=Color3.fromRGB(255,165,0);h.FillColor=Color3.fromRGB(255,165,0);h.OutlineColor=Color3.fromRGB(255,165,0);end end);task.wait(0.3);end bb:Destroy();end);end);end local gens=findGenerators();for _,g in pairs(gens) do setupGenESP(g);end local lastGenCheck=0;conns.genESP=RunService.Heartbeat:Connect(function() if  not s.genESP then return;end if ((tick() -lastGenCheck)<3) then return;end lastGenCheck=tick();for _,g in pairs(findGenerators()) do if  not genHL[g] then setupGenESP(g);end end end);end});ESPTab:CreateToggle({Name="Pallet ESP",CurrentValue=false,Flag="PalESP",Callback=function(v) s.palESP=v;if v then addObjectESP(findPallets(),palHL,Color3.fromRGB(200,80,80));else removeObjectESP(palHL);end end});ESPTab:CreateToggle({Name="Hook ESP",CurrentValue=false,Flag="HookESP",Callback=function(v) s.hookESP=v;if v then addObjectESP(findHooks(),hookHL,Color3.fromRGB(160,160,160));else removeObjectESP(hookHL);end end});ESPTab:CreateToggle({Name="Window ESP",CurrentValue=false,Flag="WinESP",Callback=function(v) s.winESP=v;if v then addObjectESP(findWindows(),winHL,Color3.fromRGB(0,160,255));else removeObjectESP(winHL);end end});ESPTab:CreateButton({Name="Refresh All ESP",Callback=function() if s.playerESP then removePlayerESP();for _,p in pairs(Players:GetPlayers()) do addPlayerESP(p);end end if s.genESP then removeObjectESP(genHL);for _,g in pairs(findGenerators()) do if  not genHL[g] then local h=Instance.new("Highlight");h.Adornee=g;h.FillColor=Color3.fromRGB(255,165,0);h.OutlineColor=Color3.fromRGB(255,165,0);h.FillTransparency=0.75;h.OutlineTransparency=0.15;h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop;h.Parent=g;genHL[g]=h;end end end if s.palESP then removeObjectESP(palHL);addObjectESP(findPallets(),palHL,Color3.fromRGB(200,80,80));end if s.hookESP then removeObjectESP(hookHL);addObjectESP(findHooks(),hookHL,Color3.fromRGB(160,160,160));end if s.winESP then removeObjectESP(winHL);addObjectESP(findWindows(),winHL,Color3.fromRGB(0,160,255));end end});TPTab:CreateSection("Quick Teleport");TPTab:CreateButton({Name="TP to Generator",Callback=function() local gens=findGenerators();local inc={};for _,g in pairs(gens) do if  not isGenComplete(g) then table.insert(inc,g);end end if ( #inc>0) then local g=inc[math.random(1, #inc)];local char=getChar();local root=char:FindFirstChild("HumanoidRootPart");if root then local tp=findGenPoint(g);local pos;if tp then pos=(tp:IsA("BasePart") and tp.Position) or tp:GetPivot().Position ;else pos=(g:IsA("Model") and g:GetPivot().Position) or g.Position ;end root.CFrame=CFrame.new(pos + Vector3.new(0,3,0) ,pos);end end end});TPTab:CreateButton({Name="TP to Finish Line",Callback=function() local fl=findFinishLine();if ( #fl>0) then local char=getChar();local root=char:FindFirstChild("HumanoidRootPart");if root then local pos=(fl[1]:IsA("Model") and fl[1]:GetPivot().Position) or fl[1].Position ;root.CFrame=CFrame.new(pos + Vector3.new(0,3,0) );end end end});TPTab:CreateSection("Teleport to Player");for _,p in pairs(Players:GetPlayers()) do if (p~=plr) then TPTab:CreateButton({Name="TP to "   .. p.Name   .. ((isKillerTeam(p) and " 🔴") or " 🟢") ,Callback=function() pcall(function() if p.Character then local tr=p.Character:FindFirstChild("HumanoidRootPart");if tr then local char=getChar();local root=char:FindFirstChild("HumanoidRootPart");if root then root.CFrame=tr.CFrame * CFrame.new(0,0,3) ;end end end end);end});end end MiscTab:CreateSection("Movement");MiscTab:CreateToggle({Name="Walk Speed",CurrentValue=false,Flag="WalkSpeed",Callback=function(v) s.walkSpeedOn=v;if conns.ws then conns.ws:Disconnect();conns.ws=nil;end if v then conns.ws=RunService.Heartbeat:Connect(function() if  not s.walkSpeedOn then return;end pcall(function() local char=plr.Character;if  not char then return;end local hum=char:FindFirstChild("Humanoid");if hum then hum.WalkSpeed=s.walkSpeed;end end);end);else pcall(function() local char=plr.Character;if char then local hum=char:FindFirstChild("Humanoid");if hum then hum.WalkSpeed=16;end end end);end end});MiscTab:CreateSlider({Name="Speed Value",Range={16,500},Increment=1,Suffix="studs/s",CurrentValue=16,Flag="SpeedVal",Callback=function(v) s.walkSpeed=v;if s.walkSpeedOn then pcall(function() local char=plr.Character;if char then local hum=char:FindFirstChild("Humanoid");if hum then hum.WalkSpeed=v;end end end);end end});MiscTab:CreateSlider({Name="Jump Power",Range={0,500},Increment=1,Suffix="",CurrentValue=50,Flag="JumpPow",Callback=function(v) pcall(function() local char=getChar();local hum=char:FindFirstChild("Humanoid");if hum then hum.JumpPower=v;end end);end});MiscTab:CreateToggle({Name="NoClip",CurrentValue=false,Flag="NoClip",Callback=function(v) s.noclip=v;if conns.noclip then conns.noclip:Disconnect();conns.noclip=nil;end if v then conns.noclip=RunService.Stepped:Connect(function() local char=getChar();for _,p in pairs(char:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide=false;end end end);else pcall(function() local char=getChar();for _,p in pairs(char:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide=true;end end end);end end});MiscTab:CreateToggle({Name="Anti Track (Ghost Movement)",CurrentValue=false,Flag="AntiTrack",Callback=function(v) s.antiTrack=v;local char=getChar();if char then char:SetAttribute("donttrack",v);char:SetAttribute("overridelookscript",v);end if conns.antiTrack then conns.antiTrack:Disconnect();conns.antiTrack=nil;end if  not v then return;end conns.antiTrack=plr.CharacterAdded:Connect(function(newChar) if  not s.antiTrack then return;end task.wait(0.5);newChar:SetAttribute("donttrack",true);newChar:SetAttribute("overridelookscript",true);end);end});MiscTab:CreateToggle({Name="Fake Lag (Desync)",CurrentValue=false,Flag="FakeLag",Callback=function(v) s.fakeLag=v;if conns.fakeLag then conns.fakeLag:Disconnect();conns.fakeLag=nil;end if  not v then return;end local remotes=ReplicatedStorage:FindFirstChild("Remotes");local ucl=remotes and remotes:FindFirstChild("Game") and remotes.Game:FindFirstChild("UpdateCharacterLook") ;if  not ucl then return;end local counter=0;conns.fakeLag=RunService.Heartbeat:Connect(function() if  not s.fakeLag then return;end counter+=1 if (counter<8) then return;end counter=0;pcall(function() local char=plr.Character;if  not char then return;end local torso=char:FindFirstChild("Torso");local hrp=char:FindFirstChild("HumanoidRootPart");if (torso and hrp) then local neck=torso:FindFirstChild("Neck");local rj=hrp:FindFirstChild("RootJoint");local rh=torso:FindFirstChild("Right Hip");local lh=torso:FindFirstChild("Left Hip");if (neck and rj and rh and lh) then local fakeRot=CFrame.Angles(0,(math.random( -180,180) * math.pi)/180 ,0);ucl:FireServer(fakeRot * neck.C0 ,fakeRot * rj.C0 ,rh.C0,lh.C0);end end end);end);end});local tpTool=nil;MiscTab:CreateToggle({Name="TP Tool (Click to TP)",CurrentValue=false,Flag="TPTool",Callback=function(v) if v then tpTool=Instance.new("Tool");tpTool.Name="TP Tool";tpTool.RequiresHandle=false;tpTool.CanBeDropped=false;tpTool.Activated:Connect(function() local mouse=plr:GetMouse();if mouse.Target then pcall(function() local char=getChar();local root=char:FindFirstChild("HumanoidRootPart");root.CFrame=CFrame.new(mouse.Hit.Position + Vector3.new(0,3,0) );end);end end);tpTool.Parent=plr.Backpack;local char=getChar();char.Humanoid:EquipTool(tpTool);elseif tpTool then tpTool:Destroy();tpTool=nil;end end});MiscTab:CreateSection("Performance");MiscTab:CreateToggle({Name="Low Graphics Mode",CurrentValue=false,Flag="LowGraphics",Callback=function(v) plr:SetAttribute("lowGraphics",v);end});MiscTab:CreateSection("Fun");MiscTab:CreateColorPicker({Name="Blood Pool Color",Color=Color3.fromRGB(93,0,2),Flag="BloodColor",Callback=function(c) plr:SetAttribute("bloodpoolscolor",c);local CollectionService=game:GetService("CollectionService");for _,v in ipairs(CollectionService:GetTagged("bloodpool")) do if v:IsA("Decal") then v.Color3=c;end end end});MiscTab:CreateSection("Visual");MiscTab:CreateSlider({Name="Time of Day",Range={0,24},Increment=1,Suffix=":00",CurrentValue=14,Flag="TimeOfDay",Callback=function(v) Lighting.ClockTime=v;Lighting.TimeOfDay=string.format("%02d:00:00",v);end});MiscTab:CreateToggle({Name="Fullbright",CurrentValue=false,Flag="Fullbright",Callback=function(v) s.fullbright=v;if v then Lighting.Ambient=Color3.fromRGB(255,255,255);Lighting.OutdoorAmbient=Color3.fromRGB(255,255,255);Lighting.Brightness=3;Lighting.FogEnd=8999999488;Lighting.FogStart=8999999488;Lighting.ClockTime=14;Lighting.TimeOfDay="14:00:00";for _,obj in pairs(Lighting:GetChildren()) do if (obj:IsA("BlurEffect") or obj:IsA("ColorCorrectionEffect") or obj:IsA("SunRaysEffect") or obj:IsA("BloomEffect") or obj:IsA("DepthOfFieldEffect") or obj:IsA("FilmGrainEffect")) then obj.Enabled=false;end if obj:IsA("Atmosphere") then obj.Density=0;obj.Haze=0;obj.Glare=0;end end else Lighting.Ambient=Color3.fromRGB(0,0,0);Lighting.OutdoorAmbient=Color3.fromRGB(127,127,127);Lighting.Brightness=1;Lighting.FogEnd=10000;Lighting.FogStart=0;for _,obj in pairs(Lighting:GetChildren()) do if (obj:IsA("BlurEffect") or obj:IsA("ColorCorrectionEffect") or obj:IsA("SunRaysEffect") or obj:IsA("BloomEffect") or obj:IsA("DepthOfFieldEffect") or obj:IsA("FilmGrainEffect")) then obj.Enabled=true;end end end end});Rayfield:Notify({Title="METLANDGG SCRIPT",Content="Loaded successfully! | Violence District",Duration=5,Image="shield"});local remotes=ReplicatedStorage:FindFirstChild("Remotes");if remotes then local deleteSpec=remotes:FindFirstChild("Game") and remotes.Game:FindFirstChild("deletespectatorgui") ;if deleteSpec then deleteSpec.OnClientEvent:Connect(function() _lastCacheTime=0;for k in pairs(genHL) do genHL[k]=nil;end for k in pairs(palHL) do palHL[k]=nil;end for k in pairs(hookHL) do hookHL[k]=nil;end for k in pairs(winHL) do winHL[k]=nil;end _cacheGens={};_cacheWins={};_cachePals={};_cacheHooks={};_cacheFL={};task.wait(3);if s.genESP then for _,g in pairs(findGenerators()) do if  not genHL[g] then local h=Instance.new("Highlight");h.Adornee=g;h.FillColor=Color3.fromRGB(255,165,0);h.OutlineColor=Color3.fromRGB(255,165,0);h.FillTransparency=0.75;h.OutlineTransparency=0.15;h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop;h.Parent=g;genHL[g]=h;end end end if s.hookESP then addObjectESP(findHooks(),hookHL,Color3.fromRGB(160,160,160));end if s.winESP then addObjectESP(findWindows(),winHL,Color3.fromRGB(0,160,255));end if s.palESP then addObjectESP(findPallets(),palHL,Color3.fromRGB(200,80,80));end end);end local cutsceneEndRemote=remotes:FindFirstChild("Game") and remotes.Game:FindFirstChild("cutsceneEnd") ;local endscreenRemote=remotes:FindFirstChild("Game") and remotes.Game:FindFirstChild("endscreencutscene") ;if cutsceneEndRemote then cutsceneEndRemote.OnClientEvent:Connect(function() _lastCacheTime=0;end);end if endscreenRemote then endscreenRemote.OnClientEvent:Connect(function() for k,v in pairs(conns) do if (v and (type(v)~="table") and v.Disconnect) then v:Disconnect();end conns[k]=nil;end aimActive=false;local char=plr.Character;if char then local hum=char:FindFirstChild("Humanoid");if hum then hum.WalkSpeed=16;end end end);end local roundEndEvent=remotes:FindFirstChild("Game") and remotes.Game:FindFirstChild("RoundEnd") ;if roundEndEvent then roundEndEvent.Event:Connect(function() for k,v in pairs(conns) do if ((type(v)=="table") and v.Disconnect) then v:Disconnect();elseif ((type(v)~="table") and v and v.Disconnect) then v:Disconnect();end conns[k]=nil;end s.autoRepair=false;s.autoPerfect=false;s.autoParry=false;s.autoVault=false;s.autoPallet=false;s.autoSelfUnhook=false;s.autoAttack=false;s.autoLunge=false;s.autoHeal=false;s.slowSurvivors=false;s.autoCarry=false;s.antiCamp=false;aimActive=false;end);end end task.spawn(function() while task.wait(8) do pcall(function() if s.hookESP then addObjectESP(findHooks(),hookHL,Color3.fromRGB(160,160,160));end if s.winESP then addObjectESP(findWindows(),winHL,Color3.fromRGB(0,160,255));end if s.palESP then addObjectESP(findPallets(),palHL,Color3.fromRGB(200,80,80));end end);end end);local function patchUsername(obj) if (obj:IsA("TextLabel") and (obj.Name=="Username")) then if (plr.Team and (plr.Team.Name=="Spectator")) then obj.Text="METLANDGG";end end end plr.PlayerGui.DescendantAdded:Connect(patchUsername);for _,obj in pairs(plr.PlayerGui:GetDescendants()) do patchUsername(obj);end plr:GetPropertyChangedSignal("Team"):Connect(function() if (plr.Team and (plr.Team.Name=="Spectator")) then for _,obj in pairs(plr.PlayerGui:GetDescendants()) do patchUsername(obj);end end end);
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+local KeyWindow = Rayfield:CreateWindow({
+    Name = "METLANDGG SCRIPT",
+    LoadingTitle = "Violence District",
+    LoadingSubtitle = "by metlandgg",
+    ConfigurationSaving = {
+        Enabled = false,
+    },
+    KeySystem = true,
+    KeySettings = {
+        Title = "METLANDGG SCRIPT",
+        Subtitle = "Violence District",
+        Note = "Get key at discord.gg/qCGFe3a",
+        FileName = "MetlandKey",
+        SaveKey = true,
+        GrabKeyFromSite = false,
+        Key = {REQUIRED_KEY}
+    }
+})
+
+local function getChar()
+    return plr.Character or plr.CharacterAdded:Wait()
+end
+
+local function deepScan(name)
+    local result = {}
+    local scanned = {}
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if not scanned[obj] then
+            scanned[obj] = true
+            if obj.Name == name and (obj:IsA("Model") or obj:IsA("BasePart") or obj:IsA("MeshPart")) then
+                table.insert(result, obj)
+            end
+        end
+    end
+    return result
+end
+
+local _cacheGens, _cacheWins, _cachePals, _cacheHooks, _cacheFL = {},{},{},{},{}
+local _lastCacheTime = 0
+local CACHE_TTL = 6
+
+local function refreshCache()
+    local now = tick()
+    if now - _lastCacheTime < CACHE_TTL then return end
+    _lastCacheTime = now
+
+    _cacheGens = {}
+    _cacheWins = {}
+    _cachePals = {}
+    _cacheHooks = {}
+    _cacheFL = {}
+
+    local map = workspace:FindFirstChild("Map")
+    local scanRoot = map or workspace
+
+    for _, obj in pairs(scanRoot:GetDescendants()) do
+        local n = obj.Name
+        if n == "Generator" and obj:IsA("Model") then
+            table.insert(_cacheGens, obj)
+        elseif n == "Window" and (obj:IsA("Model") or obj:IsA("BasePart")) then
+            table.insert(_cacheWins, obj)
+        elseif n == "Palletwrong" and (obj:IsA("Model") or obj:IsA("BasePart")) then
+            table.insert(_cachePals, obj)
+        elseif n == "Hook" and (obj:IsA("Model") or obj:IsA("BasePart")) then
+            table.insert(_cacheHooks, obj)
+        elseif n == "Fininshline" and (obj:IsA("Model") or obj:IsA("BasePart")) then
+            table.insert(_cacheFL, obj)
+        end
+    end
+end
+
+local function findGenerators() refreshCache() return _cacheGens end
+local function findWindows() refreshCache() return _cacheWins end
+local function findPallets() refreshCache() return _cachePals end
+local function findHooks() refreshCache() return _cacheHooks end
+local function findFinishLine()
+    refreshCache()
+    if #_cacheFL > 0 then return _cacheFL end
+    local map = workspace:FindFirstChild("Map")
+    if not map then return {} end
+    local result = {}
+    for _, obj in pairs(map:GetDescendants()) do
+        if obj.Name == "Fininshline" then
+            table.insert(result, obj)
+        end
+    end
+    _cacheFL = result
+    return result
+end
+
+local function isGenComplete(gen)
+    local progress = gen:GetAttribute("RepairProgress")
+    if progress then return progress >= 100 end
+    local pv = gen:FindFirstChild("Progress")
+    if pv and pv:IsA("NumberValue") then return pv.Value >= 100 end
+    return false
+end
+
+local function getGenProgress(gen)
+    return gen:GetAttribute("RepairProgress") or 0
+end
+
+local function isGenPaused(gen)
+    return gen:GetAttribute("ProgressPaused") == true
+end
+
+local function findBestGenPoint(gen)
+    local char = plr.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    local bestPoint = nil
+    for _, child in pairs(gen:GetChildren()) do
+        if child.Name:match("GeneratorPoint") and child:IsA("BasePart") then
+            local isRepairing = child:GetAttribute("IsRepairing")
+            if not isRepairing then
+                if not bestPoint then
+                    bestPoint = child
+                elseif root then
+                    local dNew = (child.Position - root.Position).Magnitude
+                    local dCur = (bestPoint.Position - root.Position).Magnitude
+                    if dNew < dCur then bestPoint = child end
+                end
+            end
+        end
+    end
+    if not bestPoint then
+        for _, child in pairs(gen:GetChildren()) do
+            if child.Name:match("GeneratorPoint") and child:IsA("BasePart") then
+                return child
+            end
+        end
+    end
+    return bestPoint
+end
+
+local function findBestGen()
+    local gens = findGenerators()
+    local best = nil
+    local bestProgress = -1
+    for _, gen in pairs(gens) do
+        local progress = getGenProgress(gen)
+        if progress >= 100 then continue end
+        if isGenPaused(gen) then continue end
+        if progress > bestProgress then
+            bestProgress = progress
+            best = gen
+        end
+    end
+    return best
+end
+
+local function findGenPoint(gen)
+    return findBestGenPoint(gen)
+end
+
+local function isKillerTeam(p)
+    return p and p.Team and p.Team.Name == "Killer"
+end
+
+local function isHooked(char)
+    if not char then return false end
+    local hookedProgress = char:GetAttribute("HookedProgress")
+    if hookedProgress and hookedProgress >= 100 then return true end
+    local hookCount = char:GetAttribute("HookCount")
+    if hookCount and hookCount > 0 then
+        local hum = char:FindFirstChild("Humanoid")
+        if hum and (hum.PlatformStand or hum.Sit) then return true end
+    end
+    for _, v in pairs(char:GetDescendants()) do
+        if v:IsA("Weld") and v.Name == "Hurtbox" then
+            if v.Part0 and v.Part0.Name == "HRP_Clone" then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local espHL = {}
+local espConns = {}
+local genHL = {} local palHL = {} local hookHL = {} local winHL = {}
+
+local function addObjectESP(objects, tbl, color)
+    for _, obj in pairs(objects) do
+        if not tbl[obj] then
+            pcall(function()
+                local h = Instance.new("Highlight")
+                h.Adornee = obj
+                h.FillColor = color
+                h.OutlineColor = color
+                h.FillTransparency = 0.75
+                h.OutlineTransparency = 0.15
+                h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                h.Parent = obj
+                tbl[obj] = h
+            end)
+        end
+    end
+end
+
+local function removeObjectESP(tbl)
+    for _, h in pairs(tbl) do pcall(function() h:Destroy() end) end
+    for k in pairs(tbl) do tbl[k] = nil end
+end
+
+local function addPlayerESP(player)
+    if player == plr then return end
+    local function makeESP(char)
+        task.wait(0.5)
+        if espHL[player] then pcall(function() espHL[player]:Destroy() end) end
+        local isK = isKillerTeam(player)
+        local h = Instance.new("Highlight")
+        h.Adornee = char
+        h.FillColor = isK and Color3.fromRGB(255,60,60) or Color3.fromRGB(60,255,120)
+        h.OutlineColor = h.FillColor
+        h.FillTransparency = 0.72
+        h.OutlineTransparency = 0.1
+        h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        h.Parent = char
+        espHL[player] = h
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            local bb = Instance.new("BillboardGui")
+            bb.Adornee = hrp
+            bb.Size = UDim2.new(0,180,0,55)
+            bb.StudsOffset = Vector3.new(0,3,0)
+            bb.AlwaysOnTop = true
+            bb.Parent = hrp
+            local nl = Instance.new("TextLabel", bb)
+            nl.Size = UDim2.new(1,0,0.5,0)
+            nl.BackgroundTransparency = 1
+            nl.Text = player.Name
+            nl.TextColor3 = Color3.fromRGB(255,255,255)
+            nl.TextSize = 14
+            nl.Font = Enum.Font.GothamBold
+            nl.TextStrokeTransparency = 0.2
+            local dl = Instance.new("TextLabel", bb)
+            dl.Size = UDim2.new(1,0,0.5,0)
+            dl.Position = UDim2.new(0,0,0.5,0)
+            dl.BackgroundTransparency = 1
+            dl.Text = "0m"
+            dl.TextColor3 = isK and Color3.fromRGB(255,150,150) or Color3.fromRGB(150,255,180)
+            dl.TextSize = 12
+            dl.Font = Enum.Font.Gotham
+            dl.TextStrokeTransparency = 0.2
+            task.spawn(function()
+                while bb.Parent and hrp.Parent do
+                    local mc = getChar()
+                    local mr = mc:FindFirstChild("HumanoidRootPart")
+                    if mr then dl.Text = string.format("%.0fm",(hrp.Position-mr.Position).Magnitude) end
+                    task.wait(0.5)
+                end
+            end)
+        end
+        task.spawn(function()
+            while char.Parent and h.Parent do
+                local newK = isKillerTeam(player)
+                if newK ~= isK then
+                    isK = newK
+                    h.FillColor = isK and Color3.fromRGB(255,60,60) or Color3.fromRGB(60,255,120)
+                    h.OutlineColor = h.FillColor
+                end
+                task.wait(3)
+            end
+        end)
+    end
+    if player.Character then makeESP(player.Character) end
+    local c = player.CharacterAdded:Connect(makeESP)
+    table.insert(espConns, c)
+end
+
+local function removePlayerESP()
+    for _, h in pairs(espHL) do pcall(function() h:Destroy() end) end
+    for _, c in pairs(espConns) do c:Disconnect() end
+    espHL = {} espConns = {}
+end
+
+local s = {
+    walkSpeed = 16,
+    walkSpeedOn = false,
+    noclip = false,
+    playerESP = false,
+    genESP = false,
+    palESP = false,
+    hookESP = false,
+    winESP = false,
+    autoRepair = false,
+    autoPerfect = false,
+    autoParry = false,
+    autoVault = false,
+    autoPallet = false,
+    autoSelfUnhook = false,
+    autoTof = false,
+    antiCamp = false,
+    autoAttack = false,
+    autoLunge = false,
+    killerInstinct = false,
+    fullbright = false,
+    autoAim = false,
+    autoHeal = false,
+    slowSurvivors = false,
+    autoCarry = false,
+    antiTrack = false,
+    fakeLag = false,
+}
+
+local conns = {}
+
+local SurvivorTab = KeyWindow:CreateTab("Survivor", "shield")
+local KillerTab = KeyWindow:CreateTab("Killer", "sword")
+local ESPTab = KeyWindow:CreateTab("ESP", "eye")
+local TPTab = KeyWindow:CreateTab("Teleport", "zap")
+local MiscTab = KeyWindow:CreateTab("Misc", "settings")
+
+SurvivorTab:CreateSection("Automation")
+
+SurvivorTab:CreateToggle({
+    Name = "Auto Repair Generator",
+    CurrentValue = false,
+    Flag = "AutoRepair",
+    Callback = function(v)
+        s.autoRepair = v
+        if conns.repair then conns.repair:Disconnect() conns.repair = nil end
+        if not v then
+            pcall(function()
+                local cam = workspace.CurrentCamera
+                if cam then
+                    local sc = cam.ViewportSize/2
+                    VirtualInputManager:SendMouseButtonEvent(sc.X,sc.Y,0,false,game,0)
+                end
+                local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                local re = remotes and remotes:FindFirstChild("Generator") and remotes.Generator:FindFirstChild("RepairEvent")
+                if re and conns.repairingGen then re:FireServer(conns.repairingGen, false) end
+                conns.repairingGen = nil
+                local char = getChar()
+                local hum = char:FindFirstChild("Humanoid")
+                if hum then hum.WalkSpeed = s.walkSpeed end
+            end)
+            return
+        end
+        local cd = 0
+        conns.repair = RunService.Heartbeat:Connect(function()
+            if not s.autoRepair then return end
+            if tick()-cd < 0.3 then return end
+            pcall(function()
+                local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                local char = plr.Character
+                if not char then return end
+                if isHooked(char) then return end
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if not root then return end
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p == plr then continue end
+                    if not p.Team or p.Team.Name ~= "Killer" then continue end
+                    if not p.Character then continue end
+                    local kr = p.Character:FindFirstChild("HumanoidRootPart")
+                    if kr and (root.Position-kr.Position).Magnitude < 20 then
+                        local cam = workspace.CurrentCamera
+                        if cam then
+                            local sc = cam.ViewportSize/2
+                            VirtualInputManager:SendMouseButtonEvent(sc.X,sc.Y,0,false,game,0)
+                        end
+                        local re = remotes and remotes:FindFirstChild("Generator") and remotes.Generator:FindFirstChild("RepairEvent")
+                        if re and conns.repairingGen then re:FireServer(conns.repairingGen,false) end
+                        conns.repairingGen = nil
+                        cd = tick()
+                        return
+                    end
+                end
+                local tg = findBestGen()
+                if not tg then
+                    local cam = workspace.CurrentCamera
+                    if cam then
+                        local sc = cam.ViewportSize/2
+                        VirtualInputManager:SendMouseButtonEvent(sc.X,sc.Y,0,false,game,0)
+                    end
+                    local hum = char:FindFirstChild("Humanoid")
+                    if hum then hum.WalkSpeed = s.walkSpeed end
+                    return
+                end
+                conns.repairingGen = tg
+                local hum = char:FindFirstChild("Humanoid")
+                local tp = findBestGenPoint(tg)
+                local pos
+                if tp then pos = tp.Position
+                else
+                    pos = tg:GetPivot().Position
+                    pos = Vector3.new(pos.X,pos.Y+3,pos.Z)
+                end
+                if (root.Position-pos).Magnitude > 5 then
+                    root.CFrame = CFrame.new(pos)
+                    cd = tick()
+                    task.wait(0.25)
+                    return
+                end
+                local gc = tg:IsA("Model") and tg:GetPivot().Position or tg.Position
+                root.CFrame = CFrame.new(pos, Vector3.new(gc.X,pos.Y,gc.Z))
+                if hum then hum.WalkSpeed = 0 end
+                local cam = workspace.CurrentCamera
+                if cam then
+                    local sc = cam.ViewportSize/2
+                    VirtualInputManager:SendMouseButtonEvent(sc.X,sc.Y,0,true,game,0)
+                end
+                local re = remotes and remotes:FindFirstChild("Generator") and remotes.Generator:FindFirstChild("RepairEvent")
+                if re then re:FireServer(tg,true) end
+
+                local ucl = remotes and remotes:FindFirstChild("Game") and remotes.Game:FindFirstChild("UpdateCharacterLook")
+                if ucl then
+                    local char2 = plr.Character
+                    if char2 then
+                        local neck = char2:FindFirstChild("Torso") and char2.Torso:FindFirstChild("Neck")
+                        local rj = char2:FindFirstChild("HumanoidRootPart") and char2.HumanoidRootPart:FindFirstChild("RootJoint")
+                        local rh = char2:FindFirstChild("Torso") and char2.Torso:FindFirstChild("Right Hip")
+                        local lh = char2:FindFirstChild("Torso") and char2.Torso:FindFirstChild("Left Hip")
+                        if neck and rj and rh and lh then
+                            pcall(function()
+                                ucl:FireServer(neck.C0, rj.C0, rh.C0, lh.C0)
+                            end)
+                        end
+                    end
+                end
+                cd = tick()
+            end)
+        end)
+    end
+})
+
+SurvivorTab:CreateToggle({
+    Name = "Auto Perfect SkillCheck",
+    CurrentValue = false,
+    Flag = "AutoPerfect",
+    Callback = function(v)
+        s.autoPerfect = v
+        if conns.sc then conns.sc:Disconnect() conns.sc = nil end
+        if not v then return end
+
+        local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+        if not remotes then return end
+
+        local genRes = remotes:FindFirstChild("Generator") and remotes.Generator:FindFirstChild("SkillCheckResultEvent")
+        local healRes = remotes:FindFirstChild("Healing") and remotes.Healing:FindFirstChild("SkillCheckResultEvent")
+        local genSC = remotes:FindFirstChild("Generator") and remotes.Generator:FindFirstChild("SkillCheckEvent")
+        local healSC = remotes:FindFirstChild("Healing") and remotes.Healing:FindFirstChild("SkillCheckEvent")
+
+        local hasFired = false
+        local lastCheck = 0
+
+        local c1 = RunService.RenderStepped:Connect(function()
+            if not s.autoPerfect then return end
+            pcall(function()
+                local PlayerGui = plr.PlayerGui
+                local gui = PlayerGui:FindFirstChild("SkillCheckPromptGui")
+                    or PlayerGui:FindFirstChild("SkillCheckPromptGui-con")
+                if not gui or not gui.Enabled then
+                    hasFired = false
+                    return
+                end
+
+                local check = gui:FindFirstChild("Check")
+                if not check or not check.Visible then
+                    hasFired = false
+                    return
+                end
+
+                local goal = check:FindFirstChild("Goal")
+                local line = check:FindFirstChild("Line")
+                if not goal or not line then
+                    hasFired = false
+                    return
+                end
+
+                if hasFired then return end
+
+                local goalRot = goal.Rotation % 360
+                local lineRot = line.Rotation % 360
+                if goalRot < 0 then goalRot += 360 end
+                if lineRot < 0 then lineRot += 360 end
+
+                local goalAbs = goal.AbsoluteSize.X
+                local halfGoal
+                if goalAbs > 0 then
+                    halfGoal = goalAbs * 0.12
+                else
+                    local checkSize = check.AbsoluteSize.X > 0 and check.AbsoluteSize.X or 300
+                    halfGoal = checkSize * goal.Size.X.Scale * 0.12
+                end
+                halfGoal = math.max(halfGoal, 18)
+
+                local diff = lineRot - goalRot
+                if diff > 180 then diff -= 360 end
+                if diff < -180 then diff += 360 end
+
+                local absDiff = math.abs(diff)
+
+                local lastLineRot = check:GetAttribute("_lastLineRot")
+                local lastTick = check:GetAttribute("_lastTick")
+                local lineSpeed = 0
+
+                local now = tick()
+                if lastLineRot and lastTick then
+                    local dtRot = lineRot - lastLineRot
+                    if dtRot > 180 then dtRot -= 360 end
+                    if dtRot < -180 then dtRot += 360 end
+                    local dtTime = now - lastTick
+                    if dtTime > 0 then
+                        lineSpeed = dtRot / dtTime
+                    end
+                end
+
+                pcall(function()
+                    check:SetAttribute("_lastLineRot", lineRot)
+                    check:SetAttribute("_lastTick", now)
+                end)
+
+                local frameLatency = math.abs(lineSpeed) > 100 and 0.03 or 0.05
+                local predictedDiff = diff - lineSpeed * frameLatency
+                if predictedDiff > 180 then predictedDiff -= 360 end
+                if predictedDiff < -180 then predictedDiff += 360 end
+
+                local absPredicted = math.abs(predictedDiff)
+
+                if absPredicted <= halfGoal then
+                    hasFired = true
+                    task.spawn(function()
+                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
+                        task.wait(0.05)
+                        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
+                        task.wait(0.8)
+                        hasFired = false
+                    end)
+                end
+            end)
+        end)
+
+        local c2, c3
+        if genSC and genRes then
+            c2 = genSC.OnClientEvent:Connect(function()
+                if not s.autoPerfect then return end
+                task.wait(0.08)
+                pcall(function() genRes:FireServer(true) end)
+            end)
+        end
+        if healSC and healRes then
+            c3 = healSC.OnClientEvent:Connect(function()
+                if not s.autoPerfect then return end
+                task.wait(0.08)
+                pcall(function() healRes:FireServer(true) end)
+            end)
+        end
+
+        conns.sc = {Disconnect = function()
+            c1:Disconnect()
+            if c2 then c2:Disconnect() end
+            if c3 then c3:Disconnect() end
+        end}
+    end
+})
+
+SurvivorTab:CreateToggle({
+    Name = "Auto Parry",
+    CurrentValue = false,
+    Flag = "AutoParry",
+    Callback = function(v)
+        s.autoParry = v
+        if conns.parry then conns.parry:Disconnect() conns.parry = nil end
+        if not v then return end
+        local db = false
+        local lastKP = {}
+        conns.parry = RunService.Heartbeat:Connect(function()
+            if not s.autoParry or db then return end
+            pcall(function()
+                local char = getChar()
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if not root then return end
+                local bp = plr:FindFirstChild("Backpack")
+                local pt = char:FindFirstChild("Parrying Dagger") or (bp and bp:FindFirstChild("Parrying Dagger"))
+                if not pt then return end
+                for _, killer in pairs(Players:GetPlayers()) do
+                    if killer == plr then continue end
+                    if not killer.Team or killer.Team.Name ~= "Killer" then continue end
+                    if not killer.Character then continue end
+                    local kr = killer.Character:FindFirstChild("HumanoidRootPart")
+                    local kh = killer.Character:FindFirstChild("Humanoid")
+                    if not kr or not kh then continue end
+                    if (root.Position-kr.Position).Magnitude > 12 then continue end
+                    local cur = kr.Position
+                    local last = lastKP[killer.UserId]
+                    lastKP[killer.UserId] = cur
+                    local lunging = false
+                    if last then
+                        local vel = (cur-last).Magnitude
+                        if vel > 0.8 then
+                            if (root.Position-cur).Unit:Dot((cur-last).Unit) > 0.7 then lunging = true end
+                        end
+                    end
+                    local swinging = false
+                    for _, track in pairs(kh:GetPlayingAnimationTracks()) do
+                        if not track.Animation then continue end
+                        if track.WeightCurrent > 0.15 and tostring(track.Priority):match("Action3") then
+                            swinging = true break
+                        end
+                    end
+                    if lunging or swinging then
+                        db = true
+                        if pt.Parent ~= char then char.Humanoid:EquipTool(pt) task.wait(0.05) end
+                        local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                        local pr = remotes and remotes:FindFirstChild("Items") and remotes.Items:FindFirstChild("Parrying Dagger") and remotes.Items["Parrying Dagger"]:FindFirstChild("parry")
+                        if pr then pr:FireServer() end
+                        task.wait(1.5)
+                        db = false
+                        return
+                    end
+                end
+            end)
+        end)
+    end
+})
+
+SurvivorTab:CreateToggle({
+    Name = "Auto Vault",
+    CurrentValue = false,
+    Flag = "AutoVault",
+    Callback = function(v)
+        s.autoVault = v
+        if conns.vault then conns.vault:Disconnect() conns.vault = nil end
+        if not v then return end
+        local cd = 0
+        conns.vault = RunService.Heartbeat:Connect(function()
+            if not s.autoVault then return end
+            if tick()-cd < 2 then return end
+            pcall(function()
+                local char = getChar()
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if not root then return end
+                local killerNear = false
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p == plr then continue end
+                    if not isKillerTeam(p) then continue end
+                    if not p.Character then continue end
+                    local kr = p.Character:FindFirstChild("HumanoidRootPart")
+                    if kr and (root.Position-kr.Position).Magnitude < 25 then killerNear=true break end
+                end
+                if not killerNear then return end
+                local wins = findWindows()
+                local nearest, nd = nil, 15
+                for _, w in pairs(wins) do
+                    local wp = w:IsA("Model") and w:GetPivot().Position or w.Position
+                    local d = (root.Position-wp).Magnitude
+                    if d < nd then nd=d nearest=w end
+                end
+                if nearest then
+                    local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                    local ve = remotes and remotes:FindFirstChild("Window") and remotes.Window:FindFirstChild("VaultEvent")
+                    if ve then ve:FireServer(nearest) cd=tick() end
+                end
+            end)
+        end)
+    end
+})
+
+SurvivorTab:CreateToggle({
+    Name = "Auto Drop Pallet",
+    CurrentValue = false,
+    Flag = "AutoPallet",
+    Callback = function(v)
+        s.autoPallet = v
+        if conns.pallet then conns.pallet:Disconnect() conns.pallet = nil end
+        if not v then return end
+        local cd = 0
+        conns.pallet = RunService.Heartbeat:Connect(function()
+            if not s.autoPallet then return end
+            if tick()-cd < 2 then return end
+            pcall(function()
+                local char = getChar()
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if not root then return end
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p == plr then continue end
+                    if not isKillerTeam(p) then continue end
+                    if not p.Character then continue end
+                    local kr = p.Character:FindFirstChild("HumanoidRootPart")
+                    if not kr then continue end
+                    if (root.Position-kr.Position).Magnitude > 8 then continue end
+                    local pals = findPallets()
+                    local nearest, nd = nil, 12
+                    for _, pal in pairs(pals) do
+                        local pp = pal:IsA("Model") and pal:GetPivot().Position or pal.Position
+                        local d = (root.Position-pp).Magnitude
+                        if d < nd then nd=d nearest=pal end
+                    end
+                    if nearest then
+                        local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                        local de = remotes and remotes:FindFirstChild("Pallet") and remotes.Pallet:FindFirstChild("PalletDropEvent")
+                        if de then de:FireServer(nearest) cd=tick() end
+                    end
+                end
+            end)
+        end)
+    end
+})
+
+SurvivorTab:CreateToggle({
+    Name = "Auto Self Unhook",
+    CurrentValue = false,
+    Flag = "AutoUnhook",
+    Callback = function(v)
+        s.autoSelfUnhook = v
+        if conns.unhook then conns.unhook:Disconnect() conns.unhook = nil end
+        if not v then return end
+        local cd = 0
+        conns.unhook = RunService.Heartbeat:Connect(function()
+            if not s.autoSelfUnhook then return end
+            if tick()-cd < 3 then return end
+            pcall(function()
+                local char = getChar()
+                if not isHooked(char) then return end
+                local hookCount = char:GetAttribute("HookCount") or 0
+                local hookedProgress = char:GetAttribute("HookedProgress") or 0
+                if hookCount >= 2 then return end
+                if hookedProgress >= 66 then return end
+                local nearbyRescuer = false
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if root then
+                    for _, p in pairs(Players:GetPlayers()) do
+                        if p == plr then continue end
+                        if isKillerTeam(p) then continue end
+                        if not p.Character then continue end
+                        local pr = p.Character:FindFirstChild("HumanoidRootPart")
+                        if pr and (root.Position-pr.Position).Magnitude < 8 then
+                            nearbyRescuer = true break
+                        end
+                    end
+                end
+                if nearbyRescuer then return end
+                local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                local sue = remotes and remotes:FindFirstChild("Carry") and remotes.Carry:FindFirstChild("SelfUnHookEvent")
+                if sue then sue:FireServer() cd=tick() end
+            end)
+        end)
+    end
+})
+
+SurvivorTab:CreateToggle({
+    Name = "Auto Twist of Fate",
+    CurrentValue = false,
+    Flag = "AutoTof",
+    Callback = function(v)
+        s.autoTof = v
+        if conns.tof then conns.tof:Disconnect() conns.tof = nil end
+        if not v then return end
+        local cd = 0
+        conns.tof = RunService.Heartbeat:Connect(function()
+            if not s.autoTof then return end
+            if tick()-cd < 1.5 then return end
+            pcall(function()
+                local char = getChar()
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if not root then return end
+                if isKillerTeam(plr) then return end
+                local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                if not remotes then return end
+                local tofFolder = remotes:FindFirstChild("Items") and remotes.Items:FindFirstChild("Twist of Fate")
+                if not tofFolder then return end
+                local fireRemote = tofFolder:FindFirstChild("Fire")
+                local vizRemote = tofFolder:FindFirstChild("VisualizeBullet")
+                if not fireRemote then return end
+                local nk, nd = nil, 80
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p == plr then continue end
+                    if not isKillerTeam(p) then continue end
+                    if not p.Character then continue end
+                    local kr = p.Character:FindFirstChild("HumanoidRootPart")
+                    if not kr then continue end
+                    local d = (root.Position-kr.Position).Magnitude
+                    if d < nd then nd=d nk=p end
+                end
+                if not nk then return end
+                local kr = nk.Character:FindFirstChild("HumanoidRootPart")
+                if not kr then return end
+                local targetPos = kr.Position
+                local direction = (targetPos - root.Position).Unit
+                fireRemote:FireServer(targetPos)
+                if vizRemote then
+                    vizRemote:FireServer(root.Position, direction, 80, "Default")
+                end
+                cd = tick()
+            end)
+        end)
+    end
+})
+
+SurvivorTab:CreateToggle({
+    Name = "Anti Camp (Hooked)",
+    CurrentValue = false,
+    Flag = "AntiCamp",
+    Callback = function(v)
+        s.antiCamp = v
+        if conns.anticamp then conns.anticamp:Disconnect() conns.anticamp = nil end
+        if not v then return end
+
+        local wasHooked = false
+        local executed = false
+        local hookPosition = nil
+        local ghostConn = nil
+        local hookPhaseConn = nil
+
+        local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+        local hookPhaseRemote = remotes and remotes:FindFirstChild("Carry") and remotes.Carry:FindFirstChild("HookPhase")
+
+        if hookPhaseRemote then
+            hookPhaseConn = hookPhaseRemote.OnClientEvent:Connect(function(phase)
+                if not s.antiCamp then return end
+                local char = getChar()
+                if not char then return end
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if not root then return end
+
+                if phase == 1 or phase == "1" or phase == "camping" or phase == true then
+                    if not executed then
+                        executed = true
+                        hookPosition = root.CFrame
+
+                        task.spawn(function()
+                            task.wait(0.5)
+
+                            local nk, nd = nil, math.huge
+                            for _, p in pairs(Players:GetPlayers()) do
+                                if p == plr then continue end
+                                if not isKillerTeam(p) then continue end
+                                if not p.Character then continue end
+                                local kr = p.Character:FindFirstChild("HumanoidRootPart")
+                                if not kr then continue end
+                                local d = (root.Position-kr.Position).Magnitude
+                                if d < nd then nd=d nk=p end
+                            end
+
+                            if nk and nk.Character then
+                                local kr = nk.Character:FindFirstChild("HumanoidRootPart")
+                                if kr then
+                                    local behindPos = kr.Position + (kr.CFrame.LookVector * -2) + Vector3.new(0,0,0)
+                                    root.CFrame = CFrame.new(behindPos)
+
+                                    if hookPosition then
+                                        ghostConn = RunService.RenderStepped:Connect(function()
+                                            if not s.antiCamp or not hookPosition then
+                                                if ghostConn then ghostConn:Disconnect() end
+                                                return
+                                            end
+                                            pcall(function()
+                                                workspace.CurrentCamera.CFrame = CFrame.new(
+                                                    hookPosition.Position + Vector3.new(0,5,10),
+                                                    hookPosition.Position
+                                                )
+                                            end)
+                                        end)
+                                        task.delay(8, function()
+                                            if ghostConn then ghostConn:Disconnect() ghostConn = nil end
+                                        end)
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+            end)
+        end
+
+        conns.anticamp = RunService.Heartbeat:Connect(function()
+            if not s.antiCamp then return end
+            pcall(function()
+                local char = getChar()
+                if not char then return end
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if not root then return end
+
+                local hooked = isHooked(char)
+
+                if not hooked then
+                    wasHooked = false
+                    executed = false
+                    if ghostConn then ghostConn:Disconnect() ghostConn = nil end
+                    hookPosition = nil
+                    return
+                end
+
+                if not wasHooked then
+                    wasHooked = true
+                    hookPosition = root.CFrame
+                end
+
+                if wasHooked and not executed and not hookPhaseRemote then
+                    executed = true
+                    task.spawn(function()
+                        task.wait(1)
+                        local nk, nd = nil, math.huge
+                        for _, p in pairs(Players:GetPlayers()) do
+                            if p == plr then continue end
+                            if not isKillerTeam(p) then continue end
+                            if not p.Character then continue end
+                            local kr = p.Character:FindFirstChild("HumanoidRootPart")
+                            if not kr then continue end
+                            local d = (root.Position-kr.Position).Magnitude
+                            if d < nd then nd=d nk=p end
+                        end
+                        if nk and nk.Character then
+                            local kr = nk.Character:FindFirstChild("HumanoidRootPart")
+                            if kr then
+                                local behindPos = kr.Position + (kr.CFrame.LookVector * -2)
+                                root.CFrame = CFrame.new(behindPos)
+                                if hookPosition then
+                                    ghostConn = RunService.RenderStepped:Connect(function()
+                                        if not s.antiCamp or not hookPosition then
+                                            if ghostConn then ghostConn:Disconnect() end
+                                            return
+                                        end
+                                        pcall(function()
+                                            workspace.CurrentCamera.CFrame = CFrame.new(
+                                                hookPosition.Position + Vector3.new(0,5,10),
+                                                hookPosition.Position
+                                            )
+                                        end)
+                                    end)
+                                    task.delay(8, function()
+                                        if ghostConn then ghostConn:Disconnect() ghostConn = nil end
+                                    end)
+                                end
+                            end
+                        end
+                    end)
+                end
+            end)
+        end)
+
+        conns.anticampHook = hookPhaseConn
+    end
+})
+
+SurvivorTab:CreateSection("Actions")
+
+local aimActive = false
+local aimKeybind = Enum.KeyCode.Q
+
+SurvivorTab:CreateToggle({
+    Name = "Auto Aim (Hold Q / Keybind)",
+    CurrentValue = false,
+    Flag = "AutoAim",
+    Callback = function(v)
+        s.autoAim = v
+        if conns.autoAim then conns.autoAim:Disconnect() conns.autoAim = nil end
+        if conns.aimKey then conns.aimKey:Disconnect() conns.aimKey = nil end
+        if not v then aimActive = false return end
+
+        conns.aimKey = UserInputService.InputBegan:Connect(function(input, gpe)
+            if gpe then return end
+            if input.KeyCode == aimKeybind then aimActive = true end
+            if input.UserInputType == Enum.UserInputType.MouseButton2 then aimActive = true end
+        end)
+        local aimKeyEnd = UserInputService.InputEnded:Connect(function(input)
+            if input.KeyCode == aimKeybind then aimActive = false end
+            if input.UserInputType == Enum.UserInputType.MouseButton2 then aimActive = false end
+        end)
+
+        conns.autoAim = RunService.RenderStepped:Connect(function()
+            if not s.autoAim or not aimActive then
+                pcall(function()
+                    local char = plr.Character
+                    if char then
+                        char:SetAttribute("Aiming", false)
+                        char:SetAttribute("overridelookscript", false)
+                    end
+                end)
+                return
+            end
+            pcall(function()
+                if isKillerTeam(plr) then return end
+                local char = getChar()
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if not root then return end
+                char:SetAttribute("Aiming", true)
+
+                local nk, nd = nil, math.huge
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p == plr then continue end
+                    if not isKillerTeam(p) then continue end
+                    if not p.Character then continue end
+                    local kr = p.Character:FindFirstChild("HumanoidRootPart")
+                    if not kr then continue end
+                    local d = (root.Position - kr.Position).Magnitude
+                    if d < nd then nd = d nk = p end
+                end
+
+                if not nk or not nk.Character then return end
+                local kr = nk.Character:FindFirstChild("HumanoidRootPart")
+                if not kr then return end
+
+                local cam = workspace.CurrentCamera
+                local torso = nk.Character:FindFirstChild("UpperTorso")
+                    or nk.Character:FindFirstChild("Torso")
+                    or kr
+                local targetPos = torso.Position + Vector3.new(0, 0.3, 0)
+                local direction = (targetPos - cam.CFrame.Position).Unit
+                local newCF = CFrame.new(cam.CFrame.Position, cam.CFrame.Position + direction)
+                cam.CFrame = cam.CFrame:Lerp(newCF, 0.35)
+            end)
+        end)
+
+        conns.aimKeyEnd = aimKeyEnd
+    end
+})
+
+SurvivorTab:CreateDropdown({
+    Name = "Aim Keybind",
+    Options = {"Q","E","F","C","V","X","Z","R","T","G","H","LeftAlt","RightAlt","CapsLock"},
+    CurrentOption = {"Q"},
+    MultipleOptions = false,
+    Flag = "AimKeybind",
+    Callback = function(opt)
+        local key = opt[1] or opt
+        aimKeybind = Enum.KeyCode[key] or Enum.KeyCode.Q
+    end
+})
+
+SurvivorTab:CreateButton({
+    Name = "Revive Target",
+    Callback = function()
+        task.spawn(function()
+            pcall(function()
+                local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                if not remotes then return end
+                local tp = nil
+                local cam = workspace.CurrentCamera
+                if cam.CameraSubject and cam.CameraSubject:IsA("Humanoid") then
+                    tp = Players:GetPlayerFromCharacter(cam.CameraSubject.Parent)
+                    if tp == plr then tp = nil end
+                end
+                if not tp then
+                    for _, p in pairs(Players:GetPlayers()) do
+                        if p ~= plr and p.Character then
+                            local h = p.Character:FindFirstChild("Humanoid")
+                            if h and (h.Health < h.MaxHealth or h.PlatformStand) then tp=p break end
+                        end
+                    end
+                end
+                if not tp or not tp.Character then return end
+                local char = getChar()
+                local root = char:FindFirstChild("HumanoidRootPart")
+                local tRoot = tp.Character:FindFirstChild("HumanoidRootPart")
+                if root and tRoot then root.CFrame = tRoot.CFrame * CFrame.new(0,0,2.5) task.wait(0.15) end
+                local carry = remotes:FindFirstChild("Carry")
+                if carry then
+                    local ue = carry:FindFirstChild("UnHookEvent")
+                    if ue then for i=1,5 do ue:FireServer(tp) task.wait(0.05) end end
+                end
+                task.wait(0.1)
+                local healing = remotes:FindFirstChild("Healing")
+                if healing then
+                    local he = healing:FindFirstChild("HealEvent")
+                    if he then for i=1,15 do he:FireServer(tp,true) task.wait(0.05) end end
+                end
+                task.wait(0.1)
+                local h = tp.Character:FindFirstChild("Humanoid")
+                if h then h.Health = h.MaxHealth end
+            end)
+        end)
+    end
+})
+
+SurvivorTab:CreateButton({
+    Name = "Instant Escape (Finish Line)",
+    Callback = function()
+        pcall(function()
+            local char = getChar()
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if not root then return end
+            local fl = findFinishLine()
+            if #fl > 0 then
+                local pos = fl[1]:IsA("Model") and fl[1]:GetPivot().Position or fl[1].Position
+                root.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
+                task.wait(0.1)
+                local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                local et = remotes and remotes:FindFirstChild("Generator") and remotes.Generator:FindFirstChild("Escapetime")
+                if et then et:FireServer() end
+                local lever = remotes and remotes:FindFirstChild("Exit") and remotes.Exit:FindFirstChild("LeverEvent")
+                if lever then lever:FireServer() end
+            end
+        end)
+    end
+})
+
+SurvivorTab:CreateButton({
+    Name = "Open Exit Gate",
+    Callback = function()
+        pcall(function()
+            local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+            local ge = remotes and remotes:FindFirstChild("Items") and remotes.Items:FindFirstChild("Gate") and remotes.Items.Gate:FindFirstChild("gate")
+            if ge then ge:FireServer() end
+        end)
+    end
+})
+
+SurvivorTab:CreateSection("Healing")
+
+SurvivorTab:CreateToggle({
+    Name = "Auto Heal Nearby Survivor",
+    CurrentValue = false,
+    Flag = "AutoHeal",
+    Callback = function(v)
+        s.autoHeal = v
+        if conns.heal then conns.heal:Disconnect() conns.heal = nil end
+        if not v then return end
+        local cd = 0
+        conns.heal = RunService.Heartbeat:Connect(function()
+            if not s.autoHeal then return end
+            if tick()-cd < 0.3 then return end
+            pcall(function()
+                local char = getChar()
+                if not char then return end
+                if isHooked(char) then return end
+                if isKillerTeam(plr) then return end
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if not root then return end
+
+                local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                if not remotes then return end
+                local healing = remotes:FindFirstChild("Healing")
+                if not healing then return end
+                local he = healing:FindFirstChild("HealEvent")
+                if not he then return end
+
+                local target = nil
+                local targetDist = 5
+
+                local myHum = char:FindFirstChild("Humanoid")
+                if myHum and myHum.Health < myHum.MaxHealth then
+                    target = plr
+                end
+
+                if not target then
+                    for _, p in pairs(Players:GetPlayers()) do
+                        if p == plr then continue end
+                        if isKillerTeam(p) then continue end
+                        if not p.Character then continue end
+                        local ph = p.Character:FindFirstChild("Humanoid")
+                        if not ph or ph.Health >= ph.MaxHealth then continue end
+                        if isHooked(p.Character) then continue end
+                        local pr = p.Character:FindFirstChild("HumanoidRootPart")
+                        if not pr then continue end
+                        local d = (root.Position-pr.Position).Magnitude
+                        if d < targetDist then
+                            targetDist = d
+                            target = p
+                        end
+                    end
+                end
+
+                if not target then return end
+                he:FireServer(target, true)
+                cd = tick()
+            end)
+        end)
+    end
+})
+
+SurvivorTab:CreateButton({
+    Name = "Full Heal Self",
+    Callback = function()
+        pcall(function()
+            local char = getChar()
+            local hum = char:FindFirstChild("Humanoid")
+            if hum then hum.Health = hum.MaxHealth end
+            local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+            local healing = remotes and remotes:FindFirstChild("Healing")
+            local he = healing and healing:FindFirstChild("HealEvent")
+            if he then
+                for i = 1, 20 do
+                    he:FireServer(plr, true)
+                    task.wait(0.05)
+                end
+            end
+        end)
+    end
+})
+
+KillerTab:CreateSection("Combat")
+
+KillerTab:CreateToggle({
+    Name = "Smart Auto Attack",
+    CurrentValue = false,
+    Flag = "AutoAttack",
+    Callback = function(v)
+        s.autoAttack = v
+        if conns.attack then conns.attack:Disconnect() conns.attack = nil end
+        if not v then return end
+
+        local lastAtk = 0
+        local atkCooldown = 0
+        local char = getChar()
+        local hum = char:FindFirstChild("Humanoid")
+
+        if hum then
+            local atkCdAttr = char:GetAttribute("AttackCooldown")
+            atkCooldown = atkCdAttr and atkCdAttr or 1.5
+        end
+
+        conns.attack = RunService.Heartbeat:Connect(function()
+            if not s.autoAttack then return end
+            if tick()-lastAtk < atkCooldown then return end
+            pcall(function()
+                if not isKillerTeam(plr) then return end
+                local ch = plr.Character
+                if not ch then return end
+                local root = ch:FindFirstChild("HumanoidRootPart")
+                if not root then return end
+
+                local killerHum = ch:FindFirstChild("Humanoid")
+                if killerHum then
+                    local newCd = ch:GetAttribute("AttackCooldown")
+                    if newCd then atkCooldown = newCd end
+                    if killerHum.Health <= 0 then return end
+                end
+
+                local ns, nd = nil, 4.5
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p == plr then continue end
+                    if isKillerTeam(p) then continue end
+                    if not p.Character then continue end
+                    local sh = p.Character:FindFirstChild("Humanoid")
+                    if not sh or sh.Health <= 0 then continue end
+                    local hookedSurv = p.Character:GetAttribute("HookedProgress")
+                    if hookedSurv and hookedSurv >= 100 then continue end
+                    local sr = p.Character:FindFirstChild("HumanoidRootPart")
+                    if not sr then continue end
+                    local d = (root.Position-sr.Position).Magnitude
+                    if d < nd then nd=d ns=p end
+                end
+
+                if not ns then return end
+
+                local sr = ns.Character:FindFirstChild("HumanoidRootPart")
+                if not sr then return end
+                local dirToTarget = (sr.Position - root.Position).Unit
+                local facingDot = root.CFrame.LookVector:Dot(dirToTarget)
+                if facingDot < 0.5 then return end
+
+                lastAtk = tick()
+                local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                if not remotes then return end
+
+                local ae = remotes:FindFirstChild("AttackEvent")
+                if ae then ae:FireServer() end
+
+                local attacks = remotes:FindFirstChild("Attacks")
+                if attacks then
+                    local ba = attacks:FindFirstChild("BasicAttack")
+                    if ba then ba:FireServer() end
+                    task.wait(0.08)
+                    local hit = attacks:FindFirstChild("hit")
+                    if hit then hit:FireServer(ns.Character) end
+                end
+            end)
+        end)
+    end
+})
+
+KillerTab:CreateToggle({
+    Name = "Smart Auto Lunge",
+    CurrentValue = false,
+    Flag = "AutoLunge",
+    Callback = function(v)
+        s.autoLunge = v
+        if conns.lunge then conns.lunge:Disconnect() conns.lunge = nil end
+        if not v then return end
+
+        local lastLunge = 0
+        local lungeCd = 4
+
+        conns.lunge = RunService.Heartbeat:Connect(function()
+            if not s.autoLunge then return end
+            if tick()-lastLunge < lungeCd then return end
+            pcall(function()
+                if not isKillerTeam(plr) then return end
+                local ch = plr.Character
+                if not ch then return end
+                local root = ch:FindFirstChild("HumanoidRootPart")
+                if not root then return end
+
+                local newCd = ch:GetAttribute("LungeCooldown")
+                if newCd then lungeCd = newCd end
+
+                local ns, nd = nil, 18
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p == plr then continue end
+                    if isKillerTeam(p) then continue end
+                    if not p.Character then continue end
+                    local sh = p.Character:FindFirstChild("Humanoid")
+                    if not sh or sh.Health <= 0 then continue end
+                    local hookedSurv = p.Character:GetAttribute("HookedProgress")
+                    if hookedSurv and hookedSurv >= 100 then continue end
+                    local sr = p.Character:FindFirstChild("HumanoidRootPart")
+                    if not sr then continue end
+                    local d = (root.Position-sr.Position).Magnitude
+                    if d < nd then nd=d ns=p end
+                end
+
+                if not ns then return end
+
+                local sr = ns.Character:FindFirstChild("HumanoidRootPart")
+                if not sr then return end
+                local dirToSurv = (sr.Position - root.Position).Unit
+                local facingDot = root.CFrame.LookVector:Dot(dirToSurv)
+                if facingDot < 0.6 then return end
+
+                local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                local le = remotes and remotes:FindFirstChild("Attacks") and remotes.Attacks:FindFirstChild("Lunge")
+                if le then le:FireServer() lastLunge = tick() end
+            end)
+        end)
+    end
+})
+
+KillerTab:CreateSection("Actions")
+
+KillerTab:CreateButton({
+    Name = "Force Drop Survivor",
+    Callback = function()
+        pcall(function()
+            local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+            local de = remotes and remotes:FindFirstChild("Carry") and remotes.Carry:FindFirstChild("DropSurvivorEvent")
+            if de then de:FireServer() end
+        end)
+    end
+})
+
+KillerTab:CreateToggle({
+    Name = "Slow All Survivors",
+    CurrentValue = false,
+    Flag = "SlowSurvivors",
+    Callback = function(v)
+        s.slowSurvivors = v
+        if conns.slow then conns.slow:Disconnect() conns.slow = nil end
+        if not v then return end
+        local cd = 0
+        conns.slow = RunService.Heartbeat:Connect(function()
+            if not s.slowSurvivors then return end
+            if tick()-cd < 2 then return end
+            pcall(function()
+                if not isKillerTeam(plr) then return end
+                local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                local sl = remotes and remotes:FindFirstChild("Mechanics") and remotes.Mechanics:FindFirstChild("Slowserver")
+                if not sl then return end
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p == plr then continue end
+                    if isKillerTeam(p) then continue end
+                    if not p.Character then continue end
+                    sl:FireServer(p.Character, 0.4, 3)
+                end
+                cd = tick()
+            end)
+        end)
+    end
+})
+
+KillerTab:CreateToggle({
+    Name = "Auto Carry Survivor",
+    CurrentValue = false,
+    Flag = "AutoCarry",
+    Callback = function(v)
+        s.autoCarry = v
+        if conns.carry then conns.carry:Disconnect() conns.carry = nil end
+        if not v then return end
+        local cd = 0
+        conns.carry = RunService.Heartbeat:Connect(function()
+            if not s.autoCarry then return end
+            if tick()-cd < 2 then return end
+            pcall(function()
+                if not isKillerTeam(plr) then return end
+                local char = getChar()
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if not root then return end
+                local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+                local ce = remotes and remotes:FindFirstChild("Carry") and remotes.Carry:FindFirstChild("CarrySurvivorEvent")
+                if not ce then return end
+                local ns, nd = nil, 5
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p == plr then continue end
+                    if isKillerTeam(p) then continue end
+                    if not p.Character then continue end
+                    local ph = p.Character:FindFirstChild("Humanoid")
+                    if not ph or ph.Health <= 0 then continue end
+                    local knocked = p.Character:GetAttribute("Knocked")
+                    if not knocked then continue end
+                    local sr = p.Character:FindFirstChild("HumanoidRootPart")
+                    if not sr then continue end
+                    local d = (root.Position-sr.Position).Magnitude
+                    if d < nd then nd=d ns=p end
+                end
+                if ns then ce:FireServer(ns.Character) cd=tick() end
+            end)
+        end)
+    end
+})
+
+KillerTab:CreateButton({
+    Name = "Mori Nearest Survivor",
+    Callback = function()
+        pcall(function()
+            if not isKillerTeam(plr) then return end
+            local char = getChar()
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if not root then return end
+            local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+            local mori = remotes and remotes:FindFirstChild("Killers") and remotes.Killers:FindFirstChild("Startmori")
+            if not mori then return end
+            local ns, nd = nil, 6
+            for _, p in pairs(Players:GetPlayers()) do
+                if p == plr then continue end
+                if isKillerTeam(p) then continue end
+                if not p.Character then continue end
+                local sr = p.Character:FindFirstChild("HumanoidRootPart")
+                if not sr then continue end
+                local d = (root.Position-sr.Position).Magnitude
+                if d < nd then nd=d ns=p end
+            end
+            if ns then mori:FireServer(ns.Character) end
+        end)
+    end
+})
+
+KillerTab:CreateButton({
+    Name = "Destroy Nearest Pallet",
+    Callback = function()
+        pcall(function()
+            local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+            local pe = remotes and remotes:FindFirstChild("Pallet") and remotes.Pallet:FindFirstChild("PalletDropEvent")
+            if not pe then return end
+            local char = getChar()
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if not root then return end
+            local pals = findPallets()
+            local nearest, nd = nil, math.huge
+            for _, pal in pairs(pals) do
+                local pp = pal:IsA("Model") and pal:GetPivot().Position or pal.Position
+                local d = (root.Position-pp).Magnitude
+                if d < nd then nd=d nearest=pal end
+            end
+            if nearest then pe:FireServer(nearest) end
+        end)
+    end
+})
+
+KillerTab:CreateButton({
+    Name = "Break Nearest Generator",
+    Callback = function()
+        pcall(function()
+            local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+            local bg = remotes and remotes:FindFirstChild("Generator") and remotes.Generator:FindFirstChild("BreakGenEvent")
+            if not bg then return end
+            local char = getChar()
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if not root then return end
+            local gens = findGenerators()
+            local nearest, nd = nil, math.huge
+            for _, g in pairs(gens) do
+                local gp = g:IsA("Model") and g:GetPivot().Position or g.Position
+                local d = (root.Position-gp).Magnitude
+                if d < nd then nd=d nearest=g end
+            end
+            if nearest then bg:FireServer(nearest) end
+        end)
+    end
+})
+
+ESPTab:CreateSection("Players")
+
+ESPTab:CreateToggle({
+    Name = "Player ESP",
+    CurrentValue = false,
+    Flag = "PlayerESP",
+    Callback = function(v)
+        s.playerESP = v
+        if conns.espRefresh then conns.espRefresh:Disconnect() conns.espRefresh = nil end
+        if v then
+            for _, p in pairs(Players:GetPlayers()) do addPlayerESP(p) end
+            table.insert(espConns, Players.PlayerAdded:Connect(addPlayerESP))
+
+            local lastESPCheck = 0
+            conns.espRefresh = RunService.Heartbeat:Connect(function()
+                if not s.playerESP then return end
+                if tick() - lastESPCheck < 2 then return end
+                lastESPCheck = tick()
+                for player, h in pairs(espHL) do
+                    if not h or not h.Parent then
+                        espHL[player] = nil
+                        addPlayerESP(player)
+                    end
+                end
+            end)
+        else
+            removePlayerESP()
+        end
+    end
+})
+
+ESPTab:CreateSection("Objects")
+
+ESPTab:CreateToggle({
+    Name = "Generator ESP",
+    CurrentValue = false,
+    Flag = "GenESP",
+    Callback = function(v)
+        s.genESP = v
+        if conns.genESP then conns.genESP:Disconnect() conns.genESP = nil end
+
+        if not v then
+            removeObjectESP(genHL)
+            for _, bb in pairs(workspace:GetDescendants()) do
+                if bb:IsA("BillboardGui") and bb.Name == "GenESP_Progress" then
+                    bb:Destroy()
+                end
+            end
+            return
+        end
+
+        local function setupGenESP(gen)
+            if genHL[gen] then return end
+            pcall(function()
+                local h = Instance.new("Highlight")
+                h.Adornee = gen
+                h.FillColor = Color3.fromRGB(255,165,0)
+                h.OutlineColor = Color3.fromRGB(255,165,0)
+                h.FillTransparency = 0.75
+                h.OutlineTransparency = 0.15
+                h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                h.Parent = gen
+                genHL[gen] = h
+
+                local mesh = gen:FindFirstChildOfClass("MeshPart") or gen:FindFirstChildOfClass("BasePart")
+                if not mesh then
+                    for _, c in pairs(gen:GetChildren()) do
+                        if c:IsA("BasePart") then mesh = c break end
+                    end
+                end
+                if not mesh then return end
+
+                local existing = mesh:FindFirstChild("GenESP_Progress")
+                if existing then existing:Destroy() end
+
+                local bb = Instance.new("BillboardGui")
+                bb.Name = "GenESP_Progress"
+                bb.Adornee = mesh
+                bb.Size = UDim2.new(0, 120, 0, 40)
+                bb.StudsOffset = Vector3.new(0, 4, 0)
+                bb.AlwaysOnTop = true
+                bb.Parent = mesh
+
+                local bg = Instance.new("Frame", bb)
+                bg.Size = UDim2.new(1, 0, 1, 0)
+                bg.BackgroundTransparency = 1
+                bg.BorderSizePixel = 0
+
+                local barBg = Instance.new("Frame", bg)
+                barBg.Size = UDim2.new(0.9, 0, 0, 8)
+                barBg.Position = UDim2.new(0.05, 0, 0.6, 0)
+                barBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                barBg.BackgroundTransparency = 0.4
+                barBg.BorderSizePixel = 0
+                Instance.new("UICorner", barBg).CornerRadius = UDim.new(1, 0)
+
+                local barFill = Instance.new("Frame", barBg)
+                barFill.Size = UDim2.new(0, 0, 1, 0)
+                barFill.BackgroundColor3 = Color3.fromRGB(255, 165, 0)
+                barFill.BorderSizePixel = 0
+                Instance.new("UICorner", barFill).CornerRadius = UDim.new(1, 0)
+
+                local label = Instance.new("TextLabel", bg)
+                label.Size = UDim2.new(1, 0, 0.55, 0)
+                label.BackgroundTransparency = 1
+                label.Text = "Gen 0%"
+                label.TextColor3 = Color3.fromRGB(255, 255, 255)
+                label.TextSize = 13
+                label.Font = Enum.Font.GothamBold
+                label.TextStrokeTransparency = 0.2
+
+                task.spawn(function()
+                    while bb.Parent and s.genESP do
+                        pcall(function()
+                            local progress = gen:GetAttribute("RepairProgress") or 0
+                            local ratio = math.clamp(progress / 100, 0, 1)
+                            barFill.Size = UDim2.new(ratio, 0, 1, 0)
+                            label.Text = string.format("%.0f%%", progress)
+                            if progress >= 100 then
+                                bb.Enabled = false
+                                h.FillColor = Color3.fromRGB(0, 255, 100)
+                                h.OutlineColor = Color3.fromRGB(0, 255, 100)
+                                h.FillTransparency = 0.9
+                            elseif progress > 50 then
+                                barFill.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+                                label.TextColor3 = Color3.fromRGB(255, 200, 0)
+                                h.FillColor = Color3.fromRGB(255, 200, 0)
+                                h.OutlineColor = Color3.fromRGB(255, 200, 0)
+                            else
+                                barFill.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+                                label.TextColor3 = Color3.fromRGB(255, 165, 0)
+                                h.FillColor = Color3.fromRGB(255, 165, 0)
+                                h.OutlineColor = Color3.fromRGB(255, 165, 0)
+                            end
+                        end)
+                        task.wait(0.3)
+                    end
+                    bb:Destroy()
+                end)
+            end)
+        end
+
+        local gens = findGenerators()
+        for _, g in pairs(gens) do setupGenESP(g) end
+
+        local lastGenCheck = 0
+        conns.genESP = RunService.Heartbeat:Connect(function()
+            if not s.genESP then return end
+            if tick() - lastGenCheck < 3 then return end
+            lastGenCheck = tick()
+            for _, g in pairs(findGenerators()) do
+                if not genHL[g] then setupGenESP(g) end
+            end
+        end)
+    end
+})
+
+ESPTab:CreateToggle({
+    Name = "Pallet ESP",
+    CurrentValue = false,
+    Flag = "PalESP",
+    Callback = function(v)
+        s.palESP = v
+        if v then addObjectESP(findPallets(), palHL, Color3.fromRGB(200,80,80))
+        else removeObjectESP(palHL) end
+    end
+})
+
+ESPTab:CreateToggle({
+    Name = "Hook ESP",
+    CurrentValue = false,
+    Flag = "HookESP",
+    Callback = function(v)
+        s.hookESP = v
+        if v then addObjectESP(findHooks(), hookHL, Color3.fromRGB(160,160,160))
+        else removeObjectESP(hookHL) end
+    end
+})
+
+ESPTab:CreateToggle({
+    Name = "Window ESP",
+    CurrentValue = false,
+    Flag = "WinESP",
+    Callback = function(v)
+        s.winESP = v
+        if v then addObjectESP(findWindows(), winHL, Color3.fromRGB(0,160,255))
+        else removeObjectESP(winHL) end
+    end
+})
+
+ESPTab:CreateButton({
+    Name = "Refresh All ESP",
+    Callback = function()
+        if s.playerESP then removePlayerESP() for _, p in pairs(Players:GetPlayers()) do addPlayerESP(p) end end
+        if s.genESP then removeObjectESP(genHL) for _, g in pairs(findGenerators()) do
+            if not genHL[g] then
+                local h = Instance.new("Highlight")
+                h.Adornee = g h.FillColor = Color3.fromRGB(255,165,0)
+                h.OutlineColor = Color3.fromRGB(255,165,0)
+                h.FillTransparency = 0.75 h.OutlineTransparency = 0.15
+                h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop h.Parent = g
+                genHL[g] = h
+            end
+        end end
+        if s.palESP then removeObjectESP(palHL) addObjectESP(findPallets(),palHL,Color3.fromRGB(200,80,80)) end
+        if s.hookESP then removeObjectESP(hookHL) addObjectESP(findHooks(),hookHL,Color3.fromRGB(160,160,160)) end
+        if s.winESP then removeObjectESP(winHL) addObjectESP(findWindows(),winHL,Color3.fromRGB(0,160,255)) end
+    end
+})
+
+TPTab:CreateSection("Quick Teleport")
+
+TPTab:CreateButton({
+    Name = "TP to Generator",
+    Callback = function()
+        local gens = findGenerators()
+        local inc = {}
+        for _, g in pairs(gens) do if not isGenComplete(g) then table.insert(inc,g) end end
+        if #inc > 0 then
+            local g = inc[math.random(1,#inc)]
+            local char = getChar()
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if root then
+                local tp = findGenPoint(g)
+                local pos
+                if tp then pos = tp:IsA("BasePart") and tp.Position or tp:GetPivot().Position
+                else pos = g:IsA("Model") and g:GetPivot().Position or g.Position end
+                root.CFrame = CFrame.new(pos + Vector3.new(0,3,0), pos)
+            end
+        end
+    end
+})
+
+TPTab:CreateButton({
+    Name = "TP to Finish Line",
+    Callback = function()
+        local fl = findFinishLine()
+        if #fl > 0 then
+            local char = getChar()
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if root then
+                local pos = fl[1]:IsA("Model") and fl[1]:GetPivot().Position or fl[1].Position
+                root.CFrame = CFrame.new(pos + Vector3.new(0,3,0))
+            end
+        end
+    end
+})
+
+TPTab:CreateSection("Teleport to Player")
+
+for _, p in pairs(Players:GetPlayers()) do
+    if p ~= plr then
+        TPTab:CreateButton({
+            Name = "TP to "..p.Name..(isKillerTeam(p) and " 🔴" or " 🟢"),
+            Callback = function()
+                pcall(function()
+                    if p.Character then
+                        local tr = p.Character:FindFirstChild("HumanoidRootPart")
+                        if tr then
+                            local char = getChar()
+                            local root = char:FindFirstChild("HumanoidRootPart")
+                            if root then root.CFrame = tr.CFrame * CFrame.new(0,0,3) end
+                        end
+                    end
+                end)
+            end
+        })
+    end
+end
+
+MiscTab:CreateSection("Movement")
+
+MiscTab:CreateToggle({
+    Name = "Walk Speed",
+    CurrentValue = false,
+    Flag = "WalkSpeed",
+    Callback = function(v)
+        s.walkSpeedOn = v
+        if conns.ws then conns.ws:Disconnect() conns.ws = nil end
+        if v then
+            conns.ws = RunService.Heartbeat:Connect(function()
+                if not s.walkSpeedOn then return end
+                pcall(function()
+                    local char = plr.Character
+                    if not char then return end
+                    local hum = char:FindFirstChild("Humanoid")
+                    if hum then hum.WalkSpeed = s.walkSpeed end
+                end)
+            end)
+        else
+            pcall(function()
+                local char = plr.Character
+                if char then
+                    local hum = char:FindFirstChild("Humanoid")
+                    if hum then hum.WalkSpeed = 16 end
+                end
+            end)
+        end
+    end
+})
+
+MiscTab:CreateSlider({
+    Name = "Speed Value",
+    Range = {16, 500},
+    Increment = 1,
+    Suffix = "studs/s",
+    CurrentValue = 16,
+    Flag = "SpeedVal",
+    Callback = function(v)
+        s.walkSpeed = v
+        if s.walkSpeedOn then
+            pcall(function()
+                local char = plr.Character
+                if char then
+                    local hum = char:FindFirstChild("Humanoid")
+                    if hum then hum.WalkSpeed = v end
+                end
+            end)
+        end
+    end
+})
+
+MiscTab:CreateSlider({
+    Name = "Jump Power",
+    Range = {0, 500},
+    Increment = 1,
+    Suffix = "",
+    CurrentValue = 50,
+    Flag = "JumpPow",
+    Callback = function(v)
+        pcall(function()
+            local char = getChar()
+            local hum = char:FindFirstChild("Humanoid")
+            if hum then hum.JumpPower = v end
+        end)
+    end
+})
+
+MiscTab:CreateToggle({
+    Name = "NoClip",
+    CurrentValue = false,
+    Flag = "NoClip",
+    Callback = function(v)
+        s.noclip = v
+        if conns.noclip then conns.noclip:Disconnect() conns.noclip = nil end
+        if v then
+            conns.noclip = RunService.Stepped:Connect(function()
+                local char = getChar()
+                for _, p in pairs(char:GetDescendants()) do
+                    if p:IsA("BasePart") then p.CanCollide = false end
+                end
+            end)
+        else
+            pcall(function()
+                local char = getChar()
+                for _, p in pairs(char:GetDescendants()) do
+                    if p:IsA("BasePart") then p.CanCollide = true end
+                end
+            end)
+        end
+    end
+})
+
+MiscTab:CreateToggle({
+    Name = "Anti Track (Ghost Movement)",
+    CurrentValue = false,
+    Flag = "AntiTrack",
+    Callback = function(v)
+        s.antiTrack = v
+        local char = getChar()
+        if char then
+            char:SetAttribute("donttrack", v)
+            char:SetAttribute("overridelookscript", v)
+        end
+        if conns.antiTrack then conns.antiTrack:Disconnect() conns.antiTrack = nil end
+        if not v then return end
+        conns.antiTrack = plr.CharacterAdded:Connect(function(newChar)
+            if not s.antiTrack then return end
+            task.wait(0.5)
+            newChar:SetAttribute("donttrack", true)
+            newChar:SetAttribute("overridelookscript", true)
+        end)
+    end
+})
+
+MiscTab:CreateToggle({
+    Name = "Fake Lag (Desync)",
+    CurrentValue = false,
+    Flag = "FakeLag",
+    Callback = function(v)
+        s.fakeLag = v
+        if conns.fakeLag then conns.fakeLag:Disconnect() conns.fakeLag = nil end
+        if not v then return end
+        local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+        local ucl = remotes and remotes:FindFirstChild("Game") and remotes.Game:FindFirstChild("UpdateCharacterLook")
+        if not ucl then return end
+        local counter = 0
+        conns.fakeLag = RunService.Heartbeat:Connect(function()
+            if not s.fakeLag then return end
+            counter += 1
+            if counter < 8 then return end
+            counter = 0
+            pcall(function()
+                local char = plr.Character
+                if not char then return end
+                local torso = char:FindFirstChild("Torso")
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                if torso and hrp then
+                    local neck = torso:FindFirstChild("Neck")
+                    local rj = hrp:FindFirstChild("RootJoint")
+                    local rh = torso:FindFirstChild("Right Hip")
+                    local lh = torso:FindFirstChild("Left Hip")
+                    if neck and rj and rh and lh then
+                        local fakeRot = CFrame.Angles(0, math.random(-180, 180) * math.pi/180, 0)
+                        ucl:FireServer(
+                            fakeRot * neck.C0,
+                            fakeRot * rj.C0,
+                            rh.C0,
+                            lh.C0
+                        )
+                    end
+                end
+            end)
+        end)
+    end
+})
+
+local tpTool = nil
+MiscTab:CreateToggle({
+    Name = "TP Tool (Click to TP)",
+    CurrentValue = false,
+    Flag = "TPTool",
+    Callback = function(v)
+        if v then
+            tpTool = Instance.new("Tool")
+            tpTool.Name = "TP Tool"
+            tpTool.RequiresHandle = false
+            tpTool.CanBeDropped = false
+            tpTool.Activated:Connect(function()
+                local mouse = plr:GetMouse()
+                if mouse.Target then
+                    pcall(function()
+                        local char = getChar()
+                        local root = char:FindFirstChild("HumanoidRootPart")
+                        root.CFrame = CFrame.new(mouse.Hit.Position + Vector3.new(0,3,0))
+                    end)
+                end
+            end)
+            tpTool.Parent = plr.Backpack
+            local char = getChar()
+            char.Humanoid:EquipTool(tpTool)
+        else
+            if tpTool then tpTool:Destroy() tpTool = nil end
+        end
+    end
+})
+
+MiscTab:CreateSection("Performance")
+
+MiscTab:CreateToggle({
+    Name = "Low Graphics Mode",
+    CurrentValue = false,
+    Flag = "LowGraphics",
+    Callback = function(v)
+        plr:SetAttribute("lowGraphics", v)
+    end
+})
+
+MiscTab:CreateSection("Fun")
+
+MiscTab:CreateColorPicker({
+    Name = "Blood Pool Color",
+    Color = Color3.fromRGB(93, 0, 2),
+    Flag = "BloodColor",
+    Callback = function(c)
+        plr:SetAttribute("bloodpoolscolor", c)
+        local CollectionService = game:GetService("CollectionService")
+        for _, v in ipairs(CollectionService:GetTagged("bloodpool")) do
+            if v:IsA("Decal") then
+                v.Color3 = c
+            end
+        end
+    end
+})
+
+MiscTab:CreateSection("Visual")
+
+MiscTab:CreateSlider({
+    Name = "Time of Day",
+    Range = {0, 24},
+    Increment = 1,
+    Suffix = ":00",
+    CurrentValue = 14,
+    Flag = "TimeOfDay",
+    Callback = function(v)
+        Lighting.ClockTime = v
+        Lighting.TimeOfDay = string.format("%02d:00:00", v)
+    end
+})
+
+MiscTab:CreateToggle({
+    Name = "Fullbright",
+    CurrentValue = false,
+    Flag = "Fullbright",
+    Callback = function(v)
+        s.fullbright = v
+        if v then
+            Lighting.Ambient = Color3.fromRGB(255,255,255)
+            Lighting.OutdoorAmbient = Color3.fromRGB(255,255,255)
+            Lighting.Brightness = 3
+            Lighting.FogEnd = 9e9
+            Lighting.FogStart = 9e9
+            Lighting.ClockTime = 14
+            Lighting.TimeOfDay = "14:00:00"
+            for _, obj in pairs(Lighting:GetChildren()) do
+                if obj:IsA("BlurEffect") or obj:IsA("ColorCorrectionEffect")
+                    or obj:IsA("SunRaysEffect") or obj:IsA("BloomEffect")
+                    or obj:IsA("DepthOfFieldEffect") or obj:IsA("FilmGrainEffect") then
+                    obj.Enabled = false
+                end
+                if obj:IsA("Atmosphere") then
+                    obj.Density = 0
+                    obj.Haze = 0
+                    obj.Glare = 0
+                end
+            end
+        else
+            Lighting.Ambient = Color3.fromRGB(0,0,0)
+            Lighting.OutdoorAmbient = Color3.fromRGB(127,127,127)
+            Lighting.Brightness = 1
+            Lighting.FogEnd = 10000
+            Lighting.FogStart = 0
+            for _, obj in pairs(Lighting:GetChildren()) do
+                if obj:IsA("BlurEffect") or obj:IsA("ColorCorrectionEffect")
+                    or obj:IsA("SunRaysEffect") or obj:IsA("BloomEffect")
+                    or obj:IsA("DepthOfFieldEffect") or obj:IsA("FilmGrainEffect") then
+                    obj.Enabled = true
+                end
+            end
+        end
+    end
+})
+
+Rayfield:Notify({
+    Title = "METLANDGG SCRIPT",
+    Content = "Loaded successfully! | Violence District",
+    Duration = 5,
+    Image = "shield",
+})
+
+local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+if remotes then
+    local deleteSpec = remotes:FindFirstChild("Game") and remotes.Game:FindFirstChild("deletespectatorgui")
+    if deleteSpec then
+        deleteSpec.OnClientEvent:Connect(function()
+            _lastCacheTime = 0
+            for k in pairs(genHL) do genHL[k] = nil end
+            for k in pairs(palHL) do palHL[k] = nil end
+            for k in pairs(hookHL) do hookHL[k] = nil end
+            for k in pairs(winHL) do winHL[k] = nil end
+            _cacheGens = {} _cacheWins = {} _cachePals = {} _cacheHooks = {} _cacheFL = {}
+            task.wait(3)
+            if s.genESP then
+                for _, g in pairs(findGenerators()) do
+                    if not genHL[g] then
+                        local h = Instance.new("Highlight")
+                        h.Adornee = g h.FillColor = Color3.fromRGB(255,165,0)
+                        h.OutlineColor = Color3.fromRGB(255,165,0)
+                        h.FillTransparency = 0.75 h.OutlineTransparency = 0.15
+                        h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop h.Parent = g
+                        genHL[g] = h
+                    end
+                end
+            end
+            if s.hookESP then addObjectESP(findHooks(), hookHL, Color3.fromRGB(160,160,160)) end
+            if s.winESP then addObjectESP(findWindows(), winHL, Color3.fromRGB(0,160,255)) end
+            if s.palESP then addObjectESP(findPallets(), palHL, Color3.fromRGB(200,80,80)) end
+        end)
+    end
+
+local cutsceneEndRemote = remotes:FindFirstChild("Game") and remotes.Game:FindFirstChild("cutsceneEnd")
+    local endscreenRemote = remotes:FindFirstChild("Game") and remotes.Game:FindFirstChild("endscreencutscene")
+
+    if cutsceneEndRemote then
+        cutsceneEndRemote.OnClientEvent:Connect(function()
+            _lastCacheTime = 0
+        end)
+    end
+
+    if endscreenRemote then
+        endscreenRemote.OnClientEvent:Connect(function()
+            for k, v in pairs(conns) do
+                if v and type(v) ~= "table" and v.Disconnect then
+                    v:Disconnect()
+                end
+                conns[k] = nil
+            end
+            aimActive = false
+            local char = plr.Character
+            if char then
+                local hum = char:FindFirstChild("Humanoid")
+                if hum then hum.WalkSpeed = 16 end
+            end
+        end)
+    end
+
+    local roundEndEvent = remotes:FindFirstChild("Game") and remotes.Game:FindFirstChild("RoundEnd")
+    if roundEndEvent then
+        roundEndEvent.Event:Connect(function()
+            for k, v in pairs(conns) do
+                if type(v) == "table" and v.Disconnect then v:Disconnect()
+                elseif type(v) ~= "table" and v and v.Disconnect then v:Disconnect() end
+                conns[k] = nil
+            end
+            s.autoRepair = false s.autoPerfect = false s.autoParry = false
+            s.autoVault = false s.autoPallet = false s.autoSelfUnhook = false
+            s.autoAttack = false s.autoLunge = false s.autoHeal = false
+            s.slowSurvivors = false s.autoCarry = false s.antiCamp = false
+            aimActive = false
+        end)
+    end
+end
+
+task.spawn(function()
+    while task.wait(8) do
+        pcall(function()
+            if s.hookESP then addObjectESP(findHooks(), hookHL, Color3.fromRGB(160,160,160)) end
+            if s.winESP then addObjectESP(findWindows(), winHL, Color3.fromRGB(0,160,255)) end
+            if s.palESP then addObjectESP(findPallets(), palHL, Color3.fromRGB(200,80,80)) end
+        end)
+    end
+end)
+
+local function patchUsername(obj)
+    if obj:IsA("TextLabel") and obj.Name == "Username" then
+        if plr.Team and plr.Team.Name == "Spectator" then
+            obj.Text = "METLANDGG"
+        end
+    end
+end
+plr.PlayerGui.DescendantAdded:Connect(patchUsername)
+for _, obj in pairs(plr.PlayerGui:GetDescendants()) do patchUsername(obj) end
+
+plr:GetPropertyChangedSignal("Team"):Connect(function()
+    if plr.Team and plr.Team.Name == "Spectator" then
+        for _, obj in pairs(plr.PlayerGui:GetDescendants()) do
+            patchUsername(obj)
+        end
+    end
+end)
